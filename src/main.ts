@@ -1,0 +1,20 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
+
+import { AppModule } from './app.module';
+import { configureDynamoose } from './config/dynamoose.config';
+
+
+configureDynamoose();
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  
+  app.use(bodyParser.json());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  
+  await app.listen(process.env.PORT || 5000);
+  console.log(`Application is running on: ${await app.getUrl()}`);
+} 
+bootstrap();
