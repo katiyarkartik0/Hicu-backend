@@ -44,7 +44,7 @@ export class InstagramController {
       const eventType = this.getInstagramEventType(req.body);
       switch (eventType) {
         case COMMENTS:
-          await this.instagramService.handleCommentEvent(req.body);
+          await this.instagramService.handleBotCommentEvent(req.body);
           return res.status(200).json({ response: 'success' });
         default:
           return res.status(400).json({ error: 'Unhandled event type' });
@@ -53,5 +53,10 @@ export class InstagramController {
       console.error(error);
       return res.status(500).json({ error: 'Internal server error' });
     }
+  }
+
+  @Get()
+  async getAllPosts(){
+
   }
 }
