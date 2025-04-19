@@ -4,16 +4,14 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto, UserDto } from 'src/user/dto/user.dto';
 import { MemberService } from 'src/member/member.service';
+import { LoginDto, UserDto } from './user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
     private jwtService: JwtService,
     private memberService: MemberService,
   ) {}
@@ -65,7 +63,6 @@ export class AuthService {
         accessToken: await this.jwtService.signAsync(payload),
       };
     } catch (error) {
-      // Check if it's a duplicate hash key error
       if (
         error.name === 'ConditionalCheckFailedException' ||
         error.message.includes('duplicate') ||
