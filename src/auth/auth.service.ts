@@ -7,20 +7,22 @@ import {
 import { UsersService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserDto } from 'src/user/dto/user.dto';
+import { LoginDto, UserDto } from 'src/user/dto/user.dto';
+import { MemberService } from 'src/member/member.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private memberService: MemberService,
   ) {}
 
   async signIn({
     email,
     password: incomingRawPassword,
-  }: UserDto): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+  }: LoginDto): Promise<any> {
+    const user = await this.memberService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
@@ -40,13 +42,19 @@ export class AuthService {
   }
 
   async signup({
+    name,
     email,
     password: incomingRawPassword,
   }: UserDto): Promise<any> {
+    const user = await this.memberService.findByEmail(email);
+    if (user) {
+      throw new UnauthorizedException('User with this email already exists');
+    }
     const hashedPassword = await bcrypt.hash(incomingRawPassword, 10);
 
     try {
-      const newUser = await this.usersService.create({
+      const newUser = await this.memberService.create({
+        name,
         email,
         password: hashedPassword,
       });

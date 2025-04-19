@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { InstagramModule } from './webhook/providers/instagram/instagram.module';
 import { ConfigModule } from '@nestjs/config';
 import { WebhookModule } from './webhook/webhook.module';
-import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { AccountModule } from './account/account.module';
+import { MemberModule } from './member/member.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -17,9 +19,11 @@ import { EmailModule } from './email/email.module';
     }),
     InstagramModule,
     WebhookModule,
-    UsersModule,
     AuthModule,
     EmailModule,
+    AccountModule,
+    MemberModule,
+    PrismaModule
   ],
   controllers: [AppController],
   providers: [AppService],
