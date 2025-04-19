@@ -7,6 +7,7 @@ import { WebhookModule } from './webhook/webhook.module';
 import { UsersModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EmailModule } from './email/email.module';
     UsersModule,
     AuthModule,
     EmailModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
