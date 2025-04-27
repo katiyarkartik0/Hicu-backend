@@ -4,14 +4,16 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GoogleGenAI, Type } from '@google/genai';
 
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
-  private readonly MIN_CLASSIFICATION: number;
+  private readonly AI: any;
 
   constructor(private readonly configService: ConfigService) {
-    this.MIN_CLASSIFICATION = 3;
+    const { geminiApiKey } = this.configService.getOrThrow<any>('gemini');
+    this.AI = new GoogleGenAI({ apiKey: geminiApiKey });
   }
 
   /**
@@ -50,7 +52,6 @@ export class GeminiService {
     - Choose only from the provided list.
     - Return ALL the categories and subcategories that match the interaction to any degree, ordered by relevance. 
     - If multiple categories match, include them in the response, ensuring the most relevant ones come first.
-    - Output only an array of strings in text format only, without any extra text.
     
     Categories:
     ${interactionClasses.map((c) => `- ${c}`).join('\n')}
@@ -117,33 +118,24 @@ export class GeminiService {
    * @throws InternalServerErrorException If the API call fails.
    */
   private async askGemini(prompt: string): Promise<any> {
-    const { geminiApiKey } = this.configService.getOrThrow<any>('gemini');
-
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      const response = await this.AI.models.generateContent({
+        model: 'gemini-2.0-flash-001',
+        contents: prompt,
+        
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.STRING,
+              description: 'Name of the classes',
+              nullable: false,
+            },
           },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-          }),
         },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        this.logger.error(
-          `Gemini API Error: ${response.status} - ${errorText}`,
-        );
-        throw new InternalServerErrorException(
-          'Failed to communicate with Gemini API',
-        );
-      }
-
-      return await response.json();
+      });
+      return JSON.parse(response.text);
     } catch (error) {
       this.logger.error('Error calling Gemini API', error);
       throw new InternalServerErrorException(
