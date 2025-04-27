@@ -9,6 +9,8 @@ import { EmailModule } from './email/email.module';
 import { AccountModule } from './account/account.module';
 import { MemberModule } from './member/member.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AccountMemberModule } from './account-member/account-member.module';
+import { InviteModule } from './invite/invite.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { PrismaModule } from './prisma/prisma.module';
     EmailModule,
     AccountModule,
     MemberModule,
-    PrismaModule
+    PrismaModule,
+    AccountMemberModule,
+    InviteModule
   ],
   controllers: [AppController],
   providers: [AppService],

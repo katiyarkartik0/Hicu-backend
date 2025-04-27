@@ -13,32 +13,32 @@ model Account {
   providerAccessToken String
   members             AccountMember[]
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Member {
-  id        String          @id @default(uuid())
-  name      String
-  email     String          @unique
-  password  String 
-  accounts  AccountMember[]
+  id       String          @id @default(uuid())
+  name     String?
+  email    String          @unique
+  password String
+  accounts AccountMember[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model AccountMember {
-  id        String        @id @default(uuid())
+  id String @id @default(uuid())
 
   accountId String
   memberId  String
 
-  status    MemberStatus 
-  scope     String[]
+  status MemberStatus @default(INVITED)
+  scope  String[]
 
-  account   Account       @relation(fields: [accountId], references: [id])
-  member    Member        @relation(fields: [memberId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+  member  Member  @relation(fields: [memberId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -7,8 +7,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MemberService } from 'src/member/member.service';
-import { LoginDto, UserDto } from './user.dto';
-
+import { LoginDto, UserDto } from './auth.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,7 +29,7 @@ export class AuthService {
       storedHashedPassword,
     );
     if (!passwordMatch) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('wrong password');
     }
     const { id } = rest;
     const payload = { id };
@@ -51,16 +50,17 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(incomingRawPassword, 10);
 
     try {
-      const newUser = await this.memberService.create({
+      const { password: _, ...newUser } = await this.memberService.create({
         name,
         email,
         password: hashedPassword,
       });
 
-      const payload = { email };
+      const payload = { email, id: newUser.id };
 
       return {
         accessToken: await this.jwtService.signAsync(payload),
+        user: newUser,
       };
     } catch (error) {
       if (
