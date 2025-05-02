@@ -24,3 +24,16 @@ export class InstagramWebhookDto {
   @Type(() => WebhookEntryDto)
   entry: WebhookEntryDto[];
 }
+
+export class CreateCommentDto {
+  id: string;
+  parentId: string;
+  media: {
+    id: string;
+  };
+  text: string;
+  from: {
+    id: string;
+    username: string;
+  };
+}

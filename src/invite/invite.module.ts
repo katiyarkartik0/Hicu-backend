@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { InviteService } from './invite.service';
+import { InviteController } from './invite.controller';
+import { AuthModule } from 'src/auth/auth.module';
+import { AccountMemberModule } from 'src/account-member/account-member.module';
+import { EmailModule } from 'src/email/nodemailer/email.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MemberModule } from 'src/member/member.module';
-import { AccountMemberModule } from 'src/account-member/account-member.module';
-import { EmailModule } from 'src/email/nodemailer/email.module';
 
 @Module({
   imports: [
-    ConfigModule,
-    MemberModule,
+    AuthModule,
     AccountMemberModule,
     EmailModule,
+    MemberModule,
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],
@@ -23,8 +24,7 @@ import { EmailModule } from 'src/email/nodemailer/email.module';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  controllers: [InviteController],
+  providers: [InviteService],
 })
-export class AuthModule {}
+export class InviteModule {}
