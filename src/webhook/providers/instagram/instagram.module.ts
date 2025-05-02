@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { InstagramController } from './instagram.controller';
 import { InstagramService } from './instagram.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
@@ -15,7 +14,7 @@ import { HttpService } from '../../../shared/http/http.service';
     })),
     HttpModule,
   ],
-  controllers: [InstagramController],
   providers: [InstagramService, HttpService],
+  exports:[InstagramService]
 })
 export class InstagramModule {}
