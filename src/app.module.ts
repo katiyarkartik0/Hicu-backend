@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WebhookModule } from './webhook/webhook.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { AiModule } from './ai/ai.module';
 import { AccountModule } from './account/account.module';
 import { MemberModule } from './member/member.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -23,6 +24,7 @@ import { InviteModule } from './invite/invite.module';
     WebhookModule,
     AuthModule,
     EmailModule,
+    AiModule,
     AccountModule,
     MemberModule,
     PrismaModule,
