@@ -3,6 +3,9 @@ import { InstagramService } from './instagram.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { HttpService } from '../../../shared/http/http.service';
+import { GeminiModule } from 'src/ai/providers/gemini/gemini.module';
+import { AutomationsModule } from 'src/automations/automations.module';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -13,6 +16,9 @@ import { HttpService } from '../../../shared/http/http.service';
       },
     })),
     HttpModule,
+    GeminiModule,
+    AutomationsModule,
+    PrismaModule
   ],
   providers: [InstagramService, HttpService],
   exports:[InstagramService]

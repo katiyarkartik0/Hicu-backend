@@ -122,7 +122,7 @@ export class GeminiService {
       const response = await this.AI.models.generateContent({
         model: 'gemini-2.0-flash-001',
         contents: prompt,
-        
+
         config: {
           responseMimeType: 'application/json',
           responseSchema: {
@@ -132,6 +132,29 @@ export class GeminiService {
               description: 'Name of the classes',
               nullable: false,
             },
+          },
+        },
+      });
+      return JSON.parse(response.text);
+    } catch (error) {
+      this.logger.error('Error calling Gemini API', error);
+      throw new InternalServerErrorException(
+        'Error communicating with Gemini API',
+      );
+    }
+  }
+
+  async queryGemini(prompt: string): Promise<any> {
+    try {
+      const response = await this.AI.models.generateContent({
+        model: 'gemini-2.0-flash-001',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: Type.STRING,
+            description: 'Response',
+            nullable: false,
           },
         },
       });
