@@ -51,3 +51,18 @@ enum MemberStatus {
   ACTIVE
   REMOVED
 }
+
+model Automation {
+  id           Int            @id @default(autoincrement())
+  mediaId      String
+  action       Json
+  UserProgress UserProgress[]
+}
+
+model UserProgress {
+  id           Int        @id @default(autoincrement())
+  automationId Int
+  automation   Automation @relation(fields: [automationId], references: [id])
+  userId       String     @unique
+  trigger      String
+}

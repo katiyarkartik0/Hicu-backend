@@ -79,16 +79,19 @@ export class WebhookController {
 
   private async processInstagramWebhook(payload: any) {
     try {
-      const { COMMENTS } = INSTAGRAM_EVENTS;
-      const eventType = this.getInstagramEventType(payload);
+      const { COMMENTS, DM_RECEIVED } = INSTAGRAM_EVENTS;
+      const eventType = this.instagramService.getInstagramEventType(payload);
       switch (eventType) {
+        case DM_RECEIVED:
+          await this.instagramService.handleDM(payload);
+          break;
         case COMMENTS:
-          await this.instagramService.handleCommentEvent(payload);
-          return { response: 'success' };
+          await this.instagramService.handleComment(payload);
+          break;
       }
     } catch (error) {
-      console.error('Error handling Instagram webhook:', error);
-      throw new InternalServerErrorException('Internal server error');
+      console.error(error);
+      throw new Error('Internal server error');
     }
   }
 }
