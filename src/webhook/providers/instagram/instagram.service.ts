@@ -267,7 +267,7 @@ export class InstagramService implements OnModuleInit {
     commentText,
     dmText,
   }: GetPromptInput) {
-    const { type: actiontype, information: extractInformation } = action;
+    const { type: actiontype, information: extractInformation,extra:additionalInformation } = action;
     const actionCb = this.getActionCb(actiontype);
     if (commentText) {
       const { COMMENTS } = INSTAGRAM_EVENTS;
@@ -277,8 +277,9 @@ export class InstagramService implements OnModuleInit {
         trigger,
         latestConversation: commentText,
         extractInformation,
+        additionalInformation
       });
-      console.log(prompt,"<----prompt")
+      console.log(prompt, '<----prompt');
       return prompt;
     } else if (dmText) {
       const { DM_RECEIVED } = INSTAGRAM_EVENTS;
@@ -288,8 +289,9 @@ export class InstagramService implements OnModuleInit {
         trigger,
         latestConversation: dmText,
         extractInformation,
+        additionalInformation
       });
-      console.log(prompt,"<----prompt")
+      console.log(prompt, '<----prompt');
       return prompt;
     }
     throw new Error('Unidentified event cannot generate prompt');
@@ -381,7 +383,7 @@ export class InstagramService implements OnModuleInit {
           trigger: commentText,
         },
       });
-      console.log(response,"<----response")
+      console.log(response, '<----response');
 
       if (!response) {
         return;
@@ -418,7 +420,7 @@ export class InstagramService implements OnModuleInit {
       dmText: messageText,
     });
     const response = await this.geminiService.queryGemini(prompt);
-    console.log(response,"<----response")
+    console.log(response, '<----response');
     if (!response) {
       return;
     }
@@ -517,12 +519,12 @@ export class InstagramService implements OnModuleInit {
 
       const { data } = await response.json();
       const messages = data[0]?.messages?.data || [];
-  
+
       // Filter messages where sender id === userId
       const filteredMessages = messages.filter(
-        (msg: any) => msg.from?.id === userId
+        (msg: any) => msg.from?.id === userId,
       );
-  
+
       return filteredMessages;
     } catch (error) {
       this.logger.error('Error fetching Instagram conversation', error.stack);
@@ -530,5 +532,24 @@ export class InstagramService implements OnModuleInit {
         'Failed to fetch Instagram conversation',
       );
     }
+  }
+
+  async getPostInfoByMediaId(mediaId: string) {
+    try{
+      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
+      const { accessToken } =
+        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+      const response = await fetch(
+        `https://graph.instagram.com/v22.0/${mediaId}?fields=id,media_type,media_url,owner,timestamp&access_token=${accessToken}`,
+      );
+      return await response.json()
+    }
+    catch(error){
+      this.logger.error('Error fetching Instagram post info', error.stack);
+      throw new InternalServerErrorException(
+        'Failed to fetch Instagram post info',
+      );
+    }
+
   }
 }

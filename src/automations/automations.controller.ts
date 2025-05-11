@@ -8,7 +8,8 @@ export class AutomationsController {
   constructor(private readonly automationsService: AutomationsService) {}
 
   @Post()
-  create(@Body() createAutomationDto: CreateAutomationDto) {
+  create(@Body() createAutomationDto: any) {
+    console.log(createAutomationDto,"kkkk")
     return this.automationsService.create(createAutomationDto);
   }
 

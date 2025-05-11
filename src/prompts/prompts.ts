@@ -9,12 +9,14 @@ export const registeredActions = {
     trigger,
     latestConversation,
     extractInformation = [],
+    additionalInformation,
   }: {
     eventType: typeof COMMENTS | typeof DM_RECEIVED;
     conversationHistory?: string[];
     latestConversation: string;
     trigger: any;
     extractInformation?: string[];
+    additionalInformation?: string;
   }) {
     const isStartOfConversation = conversationHistory.length === 0;
 
@@ -27,8 +29,10 @@ export const registeredActions = {
       - Ask open-ended or friendly follow-up questions to elicit this information.
       - Keep the tone casual and engaging, just be straight forward yet respectful. Don't try to be personal.
       - Do NOT summarize or output structured data — just keep the chat going.
+      - Do NOT repeat the question if you have the answer already.
 
       IMPORTANT:
+      - Additionally, ${additionalInformation}
       - If the user refuses or denies to answer in any way, OR if you have successfully collected all the required information (${extractInformation.join(', ')}),
         then try to gracefully end the conversation.
     `;
@@ -43,19 +47,37 @@ export const registeredActions = {
     `;
 
     if (eventType === COMMENTS && isStartOfConversation) {
-      return (basePrompt('Start') + additionalContext + `\n\nNext Message:`).trim();
+      return (
+        basePrompt('Start') +
+        additionalContext +
+        `\n\nNext Message:`
+      ).trim();
     }
 
     if (eventType === COMMENTS && !isStartOfConversation) {
-      return (basePrompt('Continue') + historyContext + additionalContext + `\n\nNext Message:`).trim();
+      return (
+        basePrompt('Continue') +
+        historyContext +
+        additionalContext +
+        `\n\nNext Message:`
+      ).trim();
     }
 
     if (eventType === DM_RECEIVED && isStartOfConversation) {
-      return (basePrompt('Start') + additionalContext + `\n\nNext Message:`).trim();
+      return (
+        basePrompt('Start') +
+        additionalContext +
+        `\n\nNext Message:`
+      ).trim();
     }
 
     if (eventType === DM_RECEIVED && !isStartOfConversation) {
-      return (basePrompt('Continue') + historyContext + additionalContext + `\n\nNext Message:`).trim();
+      return (
+        basePrompt('Continue') +
+        historyContext +
+        additionalContext +
+        `\n\nNext Message:`
+      ).trim();
     }
 
     throw new Error('Unidentified event cannot generate prompt');
