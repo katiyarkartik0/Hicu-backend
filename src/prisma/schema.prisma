@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Account {
-  id                  String          @id @default(uuid())
-  name                String
-  providerAccessToken String
-  members             AccountMember[]
+  id      Int             @id @default(autoincrement())
+  name    String
+  members AccountMember[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  AccountIntegrations AccountIntegration[]
 }
 
 model Member {
-  id       String          @id @default(uuid())
+  id       Int             @id @default(autoincrement())
   name     String?
   email    String          @unique
   password String
@@ -29,10 +29,10 @@ model Member {
 }
 
 model AccountMember {
-  id String @id @default(uuid())
+  id Int @id @default(autoincrement())
 
-  accountId String
-  memberId  String
+  accountId Int
+  memberId  Int
 
   status MemberStatus @default(INVITED)
   scope  String[]
@@ -65,4 +65,24 @@ model UserProgress {
   automation   Automation @relation(fields: [automationId], references: [id])
   userId       String     @unique
   trigger      String
+}
+
+//this has been created so that this could be sent to FE to render a page to display all the featured integrations, config to render the form
+model Integration {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  image               String
+  description         String
+  config              Json
+  accountIntegrations AccountIntegration[]
+}
+
+//this has been created so that user from FE can create integration and add entry
+model AccountIntegration {
+  id            Int         @id @default(autoincrement())
+  accountId     Int
+  integrationId Int
+  config        Json
+  account       Account     @relation(fields: [accountId], references: [id])
+  integration   Integration @relation(fields: [integrationId], references: [id])
 }
