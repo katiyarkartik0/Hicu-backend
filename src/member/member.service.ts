@@ -22,7 +22,6 @@ export class MemberService {
   }
 
   async findOne(id: string) {
-    console.log(id,"kkk")
     return this.prisma.member.findUnique({
       where: { id },
     });

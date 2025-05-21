@@ -5,6 +5,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import * as CompanyEmailValidator from 'company-email-validator';
+
 import { JwtService } from '@nestjs/jwt';
 import { MemberService } from 'src/member/member.service';
 import { LoginDto, UserDto } from './auth.dto';
@@ -76,5 +78,9 @@ export class AuthService {
         'Something went wrong during signup',
       );
     }
+  }
+
+  async isCompanyEmail(email: string) {
+    return CompanyEmailValidator.isCompanyEmail(email);
   }
 }
