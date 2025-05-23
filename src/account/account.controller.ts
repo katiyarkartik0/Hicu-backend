@@ -30,20 +30,20 @@ export class AccountController {
   }
 
   @Get(':id')
-  findAccountById(@Param('id') id: string) {
+  findAccountById(@Param('id') id: number) {
     return this.accountService.findAccountById(id);
   }
 
   @Patch(':id')
   updateAccount(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateAccountDto: UpdateAccountDto,
   ) {
     return this.accountService.updateAccount(id, updateAccountDto);
   }
 
   @Delete(':id')
-  removeAccount(@Param('id') id: string) {
+  removeAccount(@Param('id') id: number) {
     return this.accountService.removeAccount(id);
   }
 
@@ -51,8 +51,8 @@ export class AccountController {
 
   @Post(':accountId/members')
   addMemberToAccount(
-    @Param('accountId') accountId: string,
-    @Body() body: { memberId: string; status: MemberStatus; scope: string[] },
+    @Param('accountId') accountId: number,
+    @Body() body: { memberId: number; status: MemberStatus; scope: string[] },
   ) {
     const { memberId, scope, status } = body;
     return this.accountService.addMemberToAccount({
@@ -64,19 +64,19 @@ export class AccountController {
   }
 
   @Get(':accountId/members')
-  listMembersOfAccount(@Param('accountId') accountId: string) {
+  listMembersOfAccount(@Param('accountId') accountId: number) {
     return this.accountService.listMembersOfAccount(accountId);
   }
 
   @Get(':memberId/accounts')
-  listAccountsOfMember(@Param('memberId') memberId: string) {
+  listAccountsOfMember(@Param('memberId') memberId: number) {
     console.log(memberId)
     return this.accountService.listAccountsOfMember(memberId);
   }
 
   @Patch('members/:accountMemberId')
   updateMemberInAccount(
-    @Param('accountMemberId') accountMemberId: string,
+    @Param('accountMemberId') accountMemberId: number,
     @Body() { status, scope }: { status?: MemberStatus; scope?: string[] },
   ) {
     return this.accountService.updateMemberInAccount(accountMemberId, {
@@ -86,7 +86,7 @@ export class AccountController {
   }
 
   @Delete('members/:accountMemberId')
-  removeMemberFromAccount(@Param('accountMemberId') accountMemberId: string) {
+  removeMemberFromAccount(@Param('accountMemberId') accountMemberId: number) {
     return this.accountService.removeMemberFromAccount(accountMemberId);
   }
 }

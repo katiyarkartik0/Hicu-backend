@@ -81,6 +81,7 @@ export class AuthService {
   }
 
   async isCompanyEmail(email: string) {
-    return CompanyEmailValidator.isCompanyEmail(email);
+    const isValid = CompanyEmailValidator.isCompanyEmail(email);
+    return { isValid };
   }
 }

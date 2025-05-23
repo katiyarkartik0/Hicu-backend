@@ -7,7 +7,9 @@ import {
   ArrayNotEmpty,
   ArrayMinSize,
   IsNotEmpty,
-} from 'class-validator';import { IsCompanyEmail } from 'src/validators/isCompanyEmail';
+  IsNumber,
+} from 'class-validator';
+import { IsCompanyEmail } from 'src/validators/isCompanyEmail';
 
 export class UserDto {
   @IsOptional()
@@ -46,7 +48,6 @@ export class CreateInviteDto {
   @IsString({ each: true, message: 'Each scope must be a string' })
   scope: string[];
 
-  @IsString()
-  accountId:string
+  @IsNumber()
+  accountId: string;
 }
-

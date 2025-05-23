@@ -8,14 +8,19 @@ datasource db {
 }
 
 model Account {
-  id      Int             @id @default(autoincrement())
-  name    String
-  members AccountMember[]
+  id        Int                @id @default(autoincrement())
+  name      String
+  members   AccountMember[]
 
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  description String?          
+  website     String?          
+  svgIcon     String?          
+
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
   AccountIntegrations AccountIntegration[]
 }
+
 
 model Member {
   id       Int             @id @default(autoincrement())

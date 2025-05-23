@@ -8,15 +8,13 @@ import { MemberStatus } from '@prisma/client';
 export class AccountService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAccount({
-    accountName: name,
-    providerAccessToken,
-  }: CreateAccountDto) {
+  async createAccount(createAccountDto: CreateAccountDto) {
+    const accountData = {
+      ...createAccountDto,
+      name: createAccountDto.accountName,
+    };
     return await this.prisma.account.create({
-      data: {
-        name,
-        providerAccessToken,
-      },
+      data: accountData,
     });
   }
 
@@ -24,25 +22,24 @@ export class AccountService {
     return await this.prisma.account.findMany();
   }
 
-  async findAccountById(id: string) {
+  async findAccountById(id: number) {
     return await this.prisma.account.findUnique({
       where: { id },
     });
   }
 
-  async updateAccount(id: string, updateAccountDto: UpdateAccountDto) {
-    const { accountName: name, providerAccessToken } = updateAccountDto;
-
+  async updateAccount(id: number, updateAccountDto: UpdateAccountDto) {
+    const accountData = {
+      ...updateAccountDto,
+      name: updateAccountDto.accountName,
+    };
     return await this.prisma.account.update({
       where: { id },
-      data: {
-        name,
-        providerAccessToken,
-      },
+      data: accountData,
     });
   }
 
-  async removeAccount(id: string) {
+  async removeAccount(id: number) {
     return await this.prisma.account.delete({
       where: { id },
     });
@@ -53,8 +50,8 @@ export class AccountService {
     status = 'INVITED',
     scope,
   }: {
-    accountId: string;
-    memberId: string;
+    accountId: number;
+    memberId: number;
     status: MemberStatus;
     scope: string[];
   }) {
@@ -69,7 +66,7 @@ export class AccountService {
   }
 
   async updateMemberInAccount(
-    id: string,
+    id: number,
     { status, scope }: { status?: MemberStatus; scope?: string[] },
   ) {
     return this.prisma.accountMember.update({
@@ -81,27 +78,27 @@ export class AccountService {
     });
   }
 
-  async removeMemberFromAccount(id: string) {
+  async removeMemberFromAccount(id: number) {
     return this.prisma.accountMember.delete({
       where: { id },
     });
   }
 
-  async listMembersOfAccount(accountId: string) {
+  async listMembersOfAccount(accountId: number) {
     return this.prisma.accountMember.findMany({
       where: { accountId },
       include: { member: true },
     });
   }
 
-  async listAccountsOfMember(memberId: string) {
+  async listAccountsOfMember(memberId: number) {
     return this.prisma.accountMember.findMany({
       where: { memberId },
       include: { account: true },
     });
   }
 
-  async findAccountMember(id: string) {
+  async findAccountMember(id: number) {
     return this.prisma.accountMember.findUnique({
       where: { id },
       include: { member: true, account: true },

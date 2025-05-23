@@ -3,9 +3,8 @@ CREATE TYPE "MemberStatus" AS ENUM ('INVITED', 'ACTIVE', 'REMOVED');
 
 -- CreateTable
 CREATE TABLE "Account" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "providerAccessToken" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -14,7 +13,7 @@ CREATE TABLE "Account" (
 
 -- CreateTable
 CREATE TABLE "Member" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -26,9 +25,9 @@ CREATE TABLE "Member" (
 
 -- CreateTable
 CREATE TABLE "AccountMember" (
-    "id" TEXT NOT NULL,
-    "accountId" TEXT NOT NULL,
-    "memberId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "accountId" INTEGER NOT NULL,
+    "memberId" INTEGER NOT NULL,
     "status" "MemberStatus" NOT NULL DEFAULT 'INVITED',
     "scope" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -56,6 +55,27 @@ CREATE TABLE "UserProgress" (
     CONSTRAINT "UserProgress_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Integration" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "config" JSONB NOT NULL,
+
+    CONSTRAINT "Integration_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AccountIntegration" (
+    "id" SERIAL NOT NULL,
+    "accountId" INTEGER NOT NULL,
+    "integrationId" INTEGER NOT NULL,
+    "config" JSONB NOT NULL,
+
+    CONSTRAINT "AccountIntegration_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Member_email_key" ON "Member"("email");
 
@@ -73,3 +93,9 @@ ALTER TABLE "AccountMember" ADD CONSTRAINT "AccountMember_memberId_fkey" FOREIGN
 
 -- AddForeignKey
 ALTER TABLE "UserProgress" ADD CONSTRAINT "UserProgress_automationId_fkey" FOREIGN KEY ("automationId") REFERENCES "Automation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccountIntegration" ADD CONSTRAINT "AccountIntegration_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AccountIntegration" ADD CONSTRAINT "AccountIntegration_integrationId_fkey" FOREIGN KEY ("integrationId") REFERENCES "Integration"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

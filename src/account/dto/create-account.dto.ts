@@ -1,4 +1,6 @@
 export class CreateAccountDto {
   accountName: string;
-  providerAccessToken: string;
+  website?: string;
+  description?: string;
+  svgIcon?: string;
 }

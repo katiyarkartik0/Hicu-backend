@@ -21,13 +21,13 @@ export class MemberService {
     return this.prisma.member.findMany();
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     return this.prisma.member.findUnique({
       where: { id },
     });
   }
 
-  async update(id: string, updateMemberDto: UpdateMemberDto) {
+  async update(id: number, updateMemberDto: UpdateMemberDto) {
     return this.prisma.member.update({
       where: { id },
       data: {
@@ -38,7 +38,7 @@ export class MemberService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     return this.prisma.member.delete({
       where: { id },
     });

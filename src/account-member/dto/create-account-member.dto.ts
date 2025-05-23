@@ -1,12 +1,12 @@
 import { MemberStatus } from '@prisma/client';
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateAccountMemberDto {
-  @IsString()
-  accountId: string;
+  @IsNumber()
+  accountId: number;
 
-  @IsString()
-  memberId: string;
+  @IsNumber()
+  memberId: number;
 
   @IsArray()
   scope: string[];
