@@ -31,4 +31,65 @@ export class AccountMemberService {
   remove(id: number) {
     return `This action removes a #${id} accountMember`;
   }
+
+  async addMemberToAccount({
+    accountId,
+    memberId,
+    status = 'INVITED',
+    scope,
+  }: {
+    accountId: number;
+    memberId: number;
+    status: MemberStatus;
+    scope: string[];
+  }) {
+    return this.prisma.accountMember.create({
+      data: {
+        accountId,
+        memberId,
+        status,
+        scope,
+      },
+    });
+  }
+
+  async updateMemberInAccount(
+    id: number,
+    { status, scope }: { status?: MemberStatus; scope?: string[] },
+  ) {
+    return this.prisma.accountMember.update({
+      where: { id },
+      data: {
+        status,
+        scope,
+      },
+    });
+  }
+
+  async removeMemberFromAccount(id: number) {
+    return this.prisma.accountMember.delete({
+      where: { id },
+    });
+  }
+
+  async listMembersOfAccount(accountId: number) {
+    return this.prisma.accountMember.findMany({
+      where: { accountId },
+      include: { member: true },
+    });
+  }
+
+  async listAccountsOfMember(memberId: number) {
+    return this.prisma.accountMember.findMany({
+      where: { memberId },
+      include: { account: true },
+    });
+  }
+
+  async findAccountMember(id: number) {
+    return this.prisma.accountMember.findUnique({
+      where: { id },
+      include: { member: true, account: true },
+    });
+  }
 }

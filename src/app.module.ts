@@ -13,6 +13,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AccountMemberModule } from './account-member/account-member.module';
 import { InviteModule } from './invite/invite.module';
 import { AutomationsModule } from './automations/automations.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { AutomationsModule } from './automations/automations.module';
     PrismaModule,
     AccountMemberModule,
     InviteModule,
-    AutomationsModule
+    AutomationsModule,
+    IntegrationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -76,8 +76,8 @@ model UserProgress {
 model Integration {
   id                  Int                  @id @default(autoincrement())
   name                String
-  image               String
-  description         String
+  image               String?
+  description         String?
   config              Json
   accountIntegrations AccountIntegration[]
 }

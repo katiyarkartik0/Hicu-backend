@@ -1,34 +1,64 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AccountMemberService } from './account-member.service';
-import { CreateAccountMemberDto } from './dto/create-account-member.dto';
-import { UpdateAccountMemberDto } from './dto/update-account-member.dto';
+import { MemberStatus } from '@prisma/client';
 
 @Controller('account-member')
 export class AccountMemberController {
   constructor(private readonly accountMemberService: AccountMemberService) {}
-
+  
   @Post()
-  create(@Body() createAccountMemberDto: CreateAccountMemberDto) {
-    return this.accountMemberService.create(createAccountMemberDto);
+  addMemberToAccount(
+    @Body()
+    body: {
+      accountId: number;
+      memberId: number;
+      status: MemberStatus;
+      scope: string[];
+    },
+  ) {
+    return this.accountMemberService.addMemberToAccount(body);
   }
 
-  @Get()
-  findAll() {
-    return this.accountMemberService.findAll();
+  @Get('/members/:accountId')
+  listMembersOfAccount(@Param('accountId') accountId: number) {
+    return this.accountMemberService.listMembersOfAccount(accountId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.accountMemberService.findOne(+id);
+  @Get('/accounts/:memberId')
+  listAccountsOfMember(@Param('memberId') memberId: number) {
+    console.log(memberId);
+    return this.accountMemberService.listAccountsOfMember(memberId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAccountMemberDto: UpdateAccountMemberDto) {
-    return this.accountMemberService.update(+id, updateAccountMemberDto);
+  @Patch()
+  updateMemberInAccount(
+    @Body()
+    {
+      accountMemberId,
+      status,
+      scope,
+    }: {
+      accountMemberId: number;
+      status?: MemberStatus;
+      scope?: string[];
+    },
+  ) {
+    return this.accountMemberService.updateMemberInAccount(accountMemberId, {
+      status,
+      scope,
+    });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.accountMemberService.remove(+id);
+  @Delete(':accountMemberId')
+  deleteAccountMember(@Param('accountMemberId') accountMemberId: number) {
+    return this.accountMemberService.removeMemberFromAccount(accountMemberId);
   }
 }

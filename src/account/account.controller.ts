@@ -46,47 +46,4 @@ export class AccountController {
   removeAccount(@Param('id') id: number) {
     return this.accountService.removeAccount(id);
   }
-
-  // ==================== Member Management ====================
-
-  @Post(':accountId/members')
-  addMemberToAccount(
-    @Param('accountId') accountId: number,
-    @Body() body: { memberId: number; status: MemberStatus; scope: string[] },
-  ) {
-    const { memberId, scope, status } = body;
-    return this.accountService.addMemberToAccount({
-      accountId,
-      memberId,
-      status,
-      scope,
-    });
-  }
-
-  @Get(':accountId/members')
-  listMembersOfAccount(@Param('accountId') accountId: number) {
-    return this.accountService.listMembersOfAccount(accountId);
-  }
-
-  @Get(':memberId/accounts')
-  listAccountsOfMember(@Param('memberId') memberId: number) {
-    console.log(memberId)
-    return this.accountService.listAccountsOfMember(memberId);
-  }
-
-  @Patch('members/:accountMemberId')
-  updateMemberInAccount(
-    @Param('accountMemberId') accountMemberId: number,
-    @Body() { status, scope }: { status?: MemberStatus; scope?: string[] },
-  ) {
-    return this.accountService.updateMemberInAccount(accountMemberId, {
-      status,
-      scope,
-    });
-  }
-
-  @Delete('members/:accountMemberId')
-  removeMemberFromAccount(@Param('accountMemberId') accountMemberId: number) {
-    return this.accountService.removeMemberFromAccount(accountMemberId);
-  }
 }

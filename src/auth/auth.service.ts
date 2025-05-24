@@ -34,9 +34,14 @@ export class AuthService {
       throw new UnauthorizedException('wrong password');
     }
     const { id } = rest;
-    const payload = { id };
+    const payload = { id, email };
     return {
       accessToken: await this.jwtService.signAsync(payload),
+      member: {
+        id: rest.id,
+        email: rest.email,
+        name: rest.name,
+      },
     };
   }
 
@@ -52,17 +57,21 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(incomingRawPassword, 10);
 
     try {
-      const { password: _, ...newUser } = await this.memberService.create({
+      const { password: _, ...rest } = await this.memberService.create({
         name,
         email,
         password: hashedPassword,
       });
 
-      const payload = { email, id: newUser.id };
+      const payload = { email, id: rest.id };
 
       return {
         accessToken: await this.jwtService.signAsync(payload),
-        user: newUser,
+        member: {
+          id: rest.id,
+          email: rest.email,
+          name: rest.name,
+        },
       };
     } catch (error) {
       if (

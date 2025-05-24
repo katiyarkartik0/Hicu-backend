@@ -1,5 +1,5 @@
 export class CreateAccountDto {
-  accountName: string;
+  name: string;
   website?: string;
   description?: string;
   svgIcon?: string;
