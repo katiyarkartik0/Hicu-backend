@@ -80,9 +80,14 @@ export class AccountMemberService {
   }
 
   async listAccountsOfMember(memberId: number) {
-    return this.prisma.accountMember.findMany({
-      where: { memberId },
-      include: { account: true },
+    return this.prisma.account.findMany({
+      where: {
+        members: {
+          some: {
+            memberId: memberId,
+          },
+        },
+      },
     });
   }
 

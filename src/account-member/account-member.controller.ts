@@ -13,7 +13,7 @@ import { MemberStatus } from '@prisma/client';
 @Controller('account-member')
 export class AccountMemberController {
   constructor(private readonly accountMemberService: AccountMemberService) {}
-  
+
   @Post()
   addMemberToAccount(
     @Body()
@@ -32,7 +32,7 @@ export class AccountMemberController {
     return this.accountMemberService.listMembersOfAccount(accountId);
   }
 
-  @Get('/accounts/:memberId')
+  @Get('accounts/:memberId')
   listAccountsOfMember(@Param('memberId') memberId: number) {
     console.log(memberId);
     return this.accountMemberService.listAccountsOfMember(memberId);
