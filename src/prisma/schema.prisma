@@ -8,19 +8,18 @@ datasource db {
 }
 
 model Account {
-  id        Int                @id @default(autoincrement())
-  name      String
-  members   AccountMember[]
+  id      Int             @id @default(autoincrement())
+  name    String
+  members AccountMember[]
 
-  description String?          
-  website     String?          
-  svgIcon     String?          
+  description String?
+  website     String?
+  svgIcon     String?
 
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
   AccountIntegrations AccountIntegration[]
 }
-
 
 model Member {
   id       Int             @id @default(autoincrement())
@@ -75,7 +74,7 @@ model UserProgress {
 //this has been created so that this could be sent to FE to render a page to display all the featured integrations, config to render the form
 model Integration {
   id                  Int                  @id @default(autoincrement())
-  name                String
+  name                String               @unique
   image               String?
   description         String?
   config              Json
