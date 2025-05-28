@@ -15,6 +15,7 @@ import { InviteModule } from './invite/invite.module';
 import { AutomationsModule } from './automations/automations.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { AccountIntegrationModule } from './account-integration/account-integration.module';
+import { EncryptionModule } from './encryption/encryption.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { AccountIntegrationModule } from './account-integration/account-integrat
     InviteModule,
     AutomationsModule,
     IntegrationsModule,
-    AccountIntegrationModule
+    AccountIntegrationModule,
+    EncryptionModule
   ],
   controllers: [AppController],
   providers: [AppService],

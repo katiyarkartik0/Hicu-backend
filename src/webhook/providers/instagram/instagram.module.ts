@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { InstagramService } from './instagram.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { HttpService } from '../../../shared/http/http.service';
 import { GeminiModule } from 'src/ai/providers/gemini/gemini.module';
 import { AutomationsModule } from 'src/automations/automations.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -22,7 +21,7 @@ import { InstagramController } from './instagram.controller';
     PrismaModule
   ],
   controllers: [InstagramController],  // <-- ADD THIS LINE
-  providers: [InstagramService, HttpService],
+  providers: [InstagramService],
   exports:[InstagramService]
 })
 export class InstagramModule {}

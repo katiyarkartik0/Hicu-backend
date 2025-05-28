@@ -34,7 +34,6 @@ export class AccountMemberController {
 
   @Get('accounts/:memberId')
   listAccountsOfMember(@Param('memberId') memberId: number) {
-    console.log(memberId);
     return this.accountMemberService.listAccountsOfMember(memberId);
   }
 

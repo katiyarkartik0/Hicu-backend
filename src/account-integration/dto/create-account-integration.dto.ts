@@ -1,4 +1,4 @@
-import { IsInt, IsJSON } from 'class-validator';
+import { IsInt, IsObject } from 'class-validator';
 
 export class CreateAccountIntegrationDto {
   @IsInt()
@@ -7,6 +7,6 @@ export class CreateAccountIntegrationDto {
   @IsInt()
   accountId: number;
 
-  @IsJSON()
-  config: any;
+  @IsObject()
+  config: object;
 }

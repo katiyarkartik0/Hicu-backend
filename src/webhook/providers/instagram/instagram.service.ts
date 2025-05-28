@@ -5,12 +5,11 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { HttpService } from 'src/shared/http/http.service';
 import { InstagramConfig } from './instagram.types';
 import { WEBHOOK_PROVIDERS } from 'src/webhook/types/webhook.types';
 import { CreateCommentDto } from './dto/webhook.dto';
 import { ReplyModel } from './instagram.schema';
-import { registeredActions } from 'src/prompts/prompts';
+import { registeredActions } from 'src/shared/prompts/prompts';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { INSTAGRAM_EVENTS } from './constants/instagram.events';
@@ -43,7 +42,6 @@ export class InstagramService implements OnModuleInit {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
     private readonly geminiService: GeminiService,
     private readonly automationService: AutomationsService,
     private readonly prismaService: PrismaService,
@@ -163,14 +161,28 @@ export class InstagramService implements OnModuleInit {
     const { INSTAGRAM } = WEBHOOK_PROVIDERS;
     const { accessToken, apiVersion } =
       this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
-
+  
     const url = `https://graph.instagram.com/${apiVersion}/${commentId}/replies`;
-
-    return this.httpService.post(url, {
-      message,
-      access_token: accessToken,
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        access_token: accessToken,
+      }),
     });
+  
+    if (!response.ok) {
+      const errorBody = await response.text();
+      this.logger.error(`Failed to respond to comment: ${errorBody}`);
+      throw new InternalServerErrorException(
+        `Failed to respond to comment: ${response.status}`,
+      );
+    }
+  
+    return response.json();
   }
+  
 
   async sendDM(
     { comment: { commentId }, media: { mediaOwnerId } }: any,
@@ -179,39 +191,59 @@ export class InstagramService implements OnModuleInit {
     const { INSTAGRAM } = WEBHOOK_PROVIDERS;
     const { accessToken } =
       this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+  
     const url = `https://graph.instagram.com/${mediaOwnerId}/messages`;
-
-    return this.httpService.post(
-      url,
-      {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
         recipient: { comment_id: commentId },
         message: { text: message },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
+      }),
+    });
+  
+    if (!response.ok) {
+      const errorBody = await response.text();
+      this.logger.error(`Failed to send DM: ${errorBody}`);
+      throw new InternalServerErrorException(`Failed to send DM`);
+    }
+  
+    return response.json();
   }
+  
 
   async sendDmForExistingConversation(recipientId: string, message: string) {
     const { INSTAGRAM } = WEBHOOK_PROVIDERS;
     const { accessToken } =
       this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
-
+  
     const url = `https://graph.instagram.com/${this.myId}/messages`;
-    return this.httpService.post(url, {
-      recipient: {
-        id: recipientId, // Instagram User's Page-Scoped ID (PSID)
-      },
-      message: {
-        text: message,
-      },
-      messaging_type: 'RESPONSE',
-      access_token: accessToken,
+  
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipient: { id: recipientId },
+        message: { text: message },
+        messaging_type: 'RESPONSE',
+        access_token: accessToken,
+      }),
     });
+  
+    if (!response.ok) {
+      const errorBody = await response.text();
+      this.logger.error(`Failed to send DM in conversation: ${errorBody}`);
+      throw new InternalServerErrorException(
+        `Failed to send message to existing conversation`,
+      );
+    }
+  
+    return response.json();
   }
+  
 
   /**
    * Handles an Instagram comment event:

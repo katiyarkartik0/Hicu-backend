@@ -9,7 +9,7 @@ import {
   IsNotEmpty,
   IsNumber,
 } from 'class-validator';
-import { IsCompanyEmail } from 'src/validators/isCompanyEmail';
+import { IsCompanyEmail } from 'src/shared/validators/isCompanyEmail';
 
 export class UserDto {
   @IsOptional()

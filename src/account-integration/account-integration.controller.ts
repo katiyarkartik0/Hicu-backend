@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AccountIntegrationService } from './account-integration.service';
 import { CreateAccountIntegrationDto } from './dto/create-account-integration.dto';
@@ -16,7 +17,8 @@ import { UpdateAccountIntegrationDto } from './dto/update-account-integration.dt
 export class AccountIntegrationController {
   constructor(
     private readonly accountIntegrationService: AccountIntegrationService,
-  ) {}
+  ) {
+  }
 
   @Post()
   create(@Body() createAccountIntegrationDto: CreateAccountIntegrationDto) {
@@ -28,20 +30,20 @@ export class AccountIntegrationController {
     return this.accountIntegrationService.findAll();
   }
 
+  @Get('configurations')
+  async findConfiguration(
+    @Query('accountId', ParseIntPipe) accountId: number,
+    @Query('integrationId', ParseIntPipe) integrationId: number,
+  ) {
+    return await this.accountIntegrationService.getAccountConfiguration({
+      accountId,
+      integrationId,
+    }) || {};
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.accountIntegrationService.findOne(+id);
-  }
-
-  @Get('configurations')
-  findConfiguration(
-    @Query('accountId') accountId: number,
-    @Query('integrationId') integrationId: number,
-  ) {
-    return this.accountIntegrationService.getAccountConfiguration({
-      accountId,
-      integrationId,
-    });
   }
 
   @Patch(':id')
