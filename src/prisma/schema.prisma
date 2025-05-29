@@ -16,9 +16,9 @@ model Account {
   website     String?
   svgIcon     String?
 
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  AccountIntegrations AccountIntegration[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  configurations Configurations[]
 }
 
 model Member {
@@ -73,16 +73,16 @@ model UserProgress {
 
 //this has been created so that this could be sent to FE to render a page to display all the featured integrations, config to render the form
 model Integration {
-  id                  Int                  @id @default(autoincrement())
-  name                String               @unique
-  image               String?
-  description         String?
-  config              Json
-  accountIntegrations AccountIntegration[]
+  id            Int              @id @default(autoincrement())
+  name          String           @unique
+  image         String?
+  description   String?
+  config        Json
+  configuraions Configurations[]
 }
 
-//this has been created so that user from FE can create integration and add entry
-model AccountIntegration {
+//this has been created so that user from FE can give us their FB/Gemini account configuration
+model Configurations {
   id            Int         @id @default(autoincrement())
   accountId     Int
   integrationId Int

@@ -14,7 +14,7 @@ import { AccountMemberModule } from './account-member/account-member.module';
 import { InviteModule } from './invite/invite.module';
 import { AutomationsModule } from './automations/automations.module';
 import { IntegrationsModule } from './integrations/integrations.module';
-import { AccountIntegrationModule } from './account-integration/account-integration.module';
+import { ConfigurationsModule } from './configurations/configurations.module';
 import { EncryptionModule } from './encryption/encryption.module';
 
 @Module({
@@ -36,7 +36,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     InviteModule,
     AutomationsModule,
     IntegrationsModule,
-    AccountIntegrationModule,
+    ConfigurationsModule,
     EncryptionModule
   ],
   controllers: [AppController],

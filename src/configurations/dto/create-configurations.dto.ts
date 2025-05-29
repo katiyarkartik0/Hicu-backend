@@ -1,6 +1,6 @@
 import { IsInt, IsObject } from 'class-validator';
 
-export class CreateAccountIntegrationDto {
+export class CreateConfigurationsDto {
   @IsInt()
   integrationId: number;
 
