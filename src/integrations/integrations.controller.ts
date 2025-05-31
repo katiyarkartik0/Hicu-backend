@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { IntegrationsService } from './integrations.service';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
@@ -22,7 +22,7 @@ export class IntegrationsController {
     return this.integrationsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateIntegrationDto: UpdateIntegrationDto) {
     return this.integrationsService.update(+id, updateIntegrationDto);
   }

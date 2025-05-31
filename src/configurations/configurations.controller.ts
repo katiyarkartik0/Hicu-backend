@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigurationsService } from './configurations.service';
 import { CreateConfigurationsDto } from './dto/create-configurations.dto';
+import { UpdateConfigurationsDto } from './dto/update-configurations.dto';
 
 @Controller('configurations')
 export class ConfigurationsController {
@@ -16,6 +17,14 @@ export class ConfigurationsController {
   @Post()
   create(@Body() createConfigurationsDto: CreateConfigurationsDto) {
     return this.configurationsService.create(createConfigurationsDto);
+  }
+
+
+  @Post('upsert')
+  async upsertConfiguration(
+    @Body() dto: CreateConfigurationsDto | UpdateConfigurationsDto
+  ) {
+    return this.configurationsService.upsert(dto);
   }
 
   @Get('one')

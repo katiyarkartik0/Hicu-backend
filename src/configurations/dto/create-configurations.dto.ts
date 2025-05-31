@@ -8,5 +8,5 @@ export class CreateConfigurationsDto {
   accountId: number;
 
   @IsObject()
-  config: object;
+  config: Record<string, any>;
 }

@@ -21,13 +21,38 @@ export class ConfigurationsService {
 
   async create(createConfigurationsDto: CreateConfigurationsDto) {
     const { config } = createConfigurationsDto;
-    console.log(createConfigurationsDto,"createConfigurationsDto")
+    console.log(createConfigurationsDto, 'createConfigurationsDto');
 
     const encryptedConfiguration = await this.encryptConfigurations(config);
     // console.log(encryptedConfiguration,"encryptedConfiguration")
     return this.prismaService.configurations.create({
       data: { ...createConfigurationsDto, config: encryptedConfiguration },
     });
+  }
+
+  async upsert(dto: CreateConfigurationsDto | UpdateConfigurationsDto) {
+    const { config } = dto;
+console.log(dto)
+    const encryptedConfig = config
+      ? await this.encryptConfigurations(config)
+      : {};
+
+    if ('id' in dto) {
+      // Update
+      return this.prismaService.configurations.update({
+        where: { id: dto.id },
+        data: { ...dto, config: encryptedConfig },
+      });
+    } else {
+      // Create
+      return this.prismaService.configurations.create({
+        data: {
+          integrationId: dto.integrationId,
+          accountId: dto.accountId,
+          config: encryptedConfig,
+        },
+      });
+    }
   }
 
   async getConfigurationForAccount({
@@ -71,7 +96,7 @@ export class ConfigurationsService {
   }
 
   async getConfigurationsForAccount({ accountId }: { accountId: number }) {
-    console.log(accountId)
+    console.log(accountId);
     const integrations =
       (await this.prismaService.configurations.findMany({
         where: {

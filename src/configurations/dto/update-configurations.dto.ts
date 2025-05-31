@@ -1,4 +1,14 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateConfigurationsDto } from './create-configurations.dto';
+import { IsInt, IsObject } from 'class-validator';
 
-export class UpdateConfigurationsDto extends PartialType(CreateConfigurationsDto) {}
+export class UpdateConfigurationsDto {
+  @IsInt()
+  id: number;
+
+  @IsInt()
+  integrationId?: number;
+
+  @IsInt()
+  accountId?: number;
+
+  @IsObject()
+  config?: Record<string, any>; }
