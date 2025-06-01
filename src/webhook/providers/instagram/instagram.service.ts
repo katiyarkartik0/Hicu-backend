@@ -14,6 +14,7 @@ import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { INSTAGRAM_EVENTS } from './constants/instagram.events';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CONFIGURATION_ACCESS } from 'src/shared/constants';
 
 type CommentInput = {
   action: any;
@@ -45,7 +46,8 @@ export class InstagramService implements OnModuleInit {
     private readonly geminiService: GeminiService,
     private readonly automationService: AutomationsService,
     private readonly prismaService: PrismaService,
-  ) {}
+  ) {
+  }
 
   async onModuleInit() {
     const { id, username } = await this.getMyDetails();

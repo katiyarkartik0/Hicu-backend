@@ -3,7 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { EncryptionService } from './encryption.service';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true })],
+  imports: [
+    ConfigModule.forFeature(() => ({
+      secretKey: process.env.ENCRYPTION_SECRET_KEY,
+    })),
+  ],
   providers: [EncryptionService],
   exports: [EncryptionService],
 })

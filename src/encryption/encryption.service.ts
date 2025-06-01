@@ -6,7 +6,9 @@ import { Injectable } from '@nestjs/common';
 export class EncryptionService {
   private readonly algorithm = 'aes-256-cbc';
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+
+  }
 
   encrypt(text: string): string {
     const secretKey = this.configService.getOrThrow<string>('ENCRYPTION_SECRET_KEY');

@@ -29,7 +29,6 @@ export class InviteController {
     @Req() req: Request,
     @Body() body: Omit<CreateInviteDto, 'inviterEmail'>,
   ) {
-    console.log(req['user'],"world")
     const { id } = req['user'];
     const inviter = await this.memberService.findOne(id);
     if (!inviter) {

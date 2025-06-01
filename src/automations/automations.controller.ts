@@ -9,7 +9,6 @@ export class AutomationsController {
 
   @Post()
   create(@Body() createAutomationDto: any) {
-    console.log(createAutomationDto,"kkkk")
     return this.automationsService.create(createAutomationDto);
   }
 

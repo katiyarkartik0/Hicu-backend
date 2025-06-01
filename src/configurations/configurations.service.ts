@@ -15,16 +15,13 @@ export class ConfigurationsService {
     Object.keys(config).map((name) => {
       res = { ...res, [name]: this.encryptionService.encrypt(config[name]) };
     });
-    console.log(res);
     return res;
   }
 
   async create(createConfigurationsDto: CreateConfigurationsDto) {
     const { config } = createConfigurationsDto;
-    console.log(createConfigurationsDto, 'createConfigurationsDto');
 
     const encryptedConfiguration = await this.encryptConfigurations(config);
-    // console.log(encryptedConfiguration,"encryptedConfiguration")
     return this.prismaService.configurations.create({
       data: { ...createConfigurationsDto, config: encryptedConfiguration },
     });
@@ -32,7 +29,6 @@ export class ConfigurationsService {
 
   async upsert(dto: CreateConfigurationsDto | UpdateConfigurationsDto) {
     const { config } = dto;
-console.log(dto)
     const encryptedConfig = config
       ? await this.encryptConfigurations(config)
       : {};
@@ -96,14 +92,12 @@ console.log(dto)
   }
 
   async getConfigurationsForAccount({ accountId }: { accountId: number }) {
-    console.log(accountId);
     const integrations =
       (await this.prismaService.configurations.findMany({
         where: {
           accountId: accountId,
         },
       })) || [];
-    console.log(integrations, 'integrations');
     const res = integrations.map((integration) => {
       const config =
         integration.config && typeof integration.config === 'object'

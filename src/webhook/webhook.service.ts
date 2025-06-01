@@ -10,6 +10,7 @@ export class WebhookService {
   }
   
   verifyWebhook(token: string) {
+    console.log(this.WEBHOOK_SECRET)
     return token === this.WEBHOOK_SECRET;
   }
 }

@@ -58,6 +58,7 @@ export class WebhookController {
         message: 'Invalid mode.',
       };
     }
+
     if (!this.webhookService.verifyWebhook(verifyToken)) {
       return {
         message: 'Invalid token.',
