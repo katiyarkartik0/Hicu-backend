@@ -6,6 +6,7 @@ import { GeminiModule } from 'src/ai/providers/gemini/gemini.module';
 import { AutomationsModule } from 'src/automations/automations.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { InstagramController } from './instagram.controller';
+import { ConfigurationsModule } from 'src/configurations/configurations.module';
 
 @Module({
   imports: [
@@ -18,10 +19,11 @@ import { InstagramController } from './instagram.controller';
     HttpModule,
     GeminiModule,
     AutomationsModule,
-    PrismaModule
+    PrismaModule,
+    ConfigurationsModule,
   ],
-  controllers: [InstagramController],  // <-- ADD THIS LINE
+  controllers: [InstagramController], // <-- ADD THIS LINE
   providers: [InstagramService],
-  exports:[InstagramService]
+  exports: [InstagramService],
 })
 export class InstagramModule {}

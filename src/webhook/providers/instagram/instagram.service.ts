@@ -14,7 +14,8 @@ import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { INSTAGRAM_EVENTS } from './constants/instagram.events';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CONFIGURATION_ACCESS } from 'src/shared/constants';
+import { CONFIGURATIONS_VARIABLES } from 'src/shared/constants';
+import { ConfigurationsService } from 'src/configurations/configurations.service';
 
 type CommentInput = {
   action: any;
@@ -34,6 +35,30 @@ type DMInput = {
 
 type GetPromptInput = CommentInput | DMInput;
 
+type MediaItem = {
+  id: string;
+  mediaType: string;
+  mediaUrl: string;
+  caption?: string;
+  timestamp: string;
+  thumbnail: string;
+};
+
+type UserProfile = {
+  id: string;
+  name: string;
+  username: string;
+  biography: string;
+  profilePictureUrl: string;
+  followersCount: number;
+  followsCount: number;
+  mediaCount: number;
+  accountType: string;
+  media: {
+    data: MediaItem[];
+  };
+};
+
 @Injectable()
 export class InstagramService implements OnModuleInit {
   private readonly logger = new Logger(InstagramService.name);
@@ -46,11 +71,11 @@ export class InstagramService implements OnModuleInit {
     private readonly geminiService: GeminiService,
     private readonly automationService: AutomationsService,
     private readonly prismaService: PrismaService,
-  ) {
-  }
+    private readonly configurationsService: ConfigurationsService,
+  ) {}
 
   async onModuleInit() {
-    const { id, username } = await this.getMyDetails();
+    const { id, username } = await this.getMyDetails({ accountId: 9 });
     this.myId = id;
     this.myUsername = username;
     this.logger.log(`Loaded Instagram account: ${username} (${id})`);
@@ -85,19 +110,100 @@ export class InstagramService implements OnModuleInit {
 
     return UNKNOWN;
   }
+  private getInstagramFields(): string {
+    return [
+      'id',
+      'name',
+      'username',
+      'biography',
+      'profile_picture_url',
+      'followers_count',
+      'follows_count',
+      'media_count',
+      'account_type',
+      'media{id,caption,media_type,media_url,thumbnail_url,timestamp}',
+    ].join(',');
+  }
 
-  private async getMyDetails() {
+  private async getInstagramAccessToken({ accountId }: { accountId: number }) {
+    const { config: configurations } =
+      await this.configurationsService.getConfigurationForAccount({
+        integrationName: 'instagram',
+        accountId,
+      });
+    const accessToken =
+      configurations[CONFIGURATIONS_VARIABLES.INSTAGRAM.ACCESS_TOKEN];
+    return accessToken;
+  }
+
+  async getMyDetails({
+    accountId,
+  }: {
+    accountId: number;
+  }): Promise<UserProfile> {
     try {
-      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-      const { accessToken } =
-        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
-      const response = await fetch(
-        `https://graph.instagram.com/me?fields=id,username&access_token=${accessToken}`,
+      const accessToken = await this.getInstagramAccessToken({ accountId });
+      const params = new URLSearchParams({
+        fields: this.getInstagramFields(),
+        access_token: accessToken,
+      });
+
+      const url = `https://graph.instagram.com/me?${params.toString()}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error(
+          `Instagram API error: ${response.status} - ${errorText}`,
+        );
+        throw new Error('Instagram API request failed');
+      }
+
+      const {
+        id,
+        name,
+        username,
+        biography,
+        profile_picture_url,
+        followers_count,
+        follows_count,
+        media_count,
+        account_type,
+        media: { data },
+      } = await response.json();
+
+      const mediaItems: MediaItem[] = data.map(
+        ({ id, media_type, media_url, caption, thumbnail, timestamp }) =>
+          ({
+            id,
+            mediaType: media_type,
+            mediaUrl: media_url,
+            caption,
+            timestamp,
+            thumbnail,
+          }) as MediaItem,
       );
-      return await response.json();
+
+      return {
+        id,
+        name,
+        username,
+        biography: biography || '',
+        profilePictureUrl: profile_picture_url || '',
+        followersCount: followers_count,
+        followsCount: follows_count,
+        mediaCount: media_count,
+        accountType: account_type,
+        media: {
+          data: mediaItems,
+        },
+      };
     } catch (error) {
-      this.logger.error('Error fetching my details', error.stack);
-      throw new InternalServerErrorException('Failed to fetch  my details');
+      this.logger.error(
+        'Error fetching my details',
+        error.stack || error.message,
+      );
+      throw new InternalServerErrorException('Failed to fetch my details');
     }
   }
 
@@ -159,12 +265,14 @@ export class InstagramService implements OnModuleInit {
     };
   }
 
-  async respondToComment(commentId: string, message: string) {
-    const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-    const { accessToken, apiVersion } =
-      this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
-  
-    const url = `https://graph.instagram.com/${apiVersion}/${commentId}/replies`;
+  async respondToComment(
+    commentId: string,
+    message: string,
+    accountId: number,
+  ) {
+    const accessToken = await this.getInstagramAccessToken({ accountId });
+
+    const url = `https://graph.instagram.com/v22.0/${commentId}/replies`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -173,7 +281,7 @@ export class InstagramService implements OnModuleInit {
         access_token: accessToken,
       }),
     });
-  
+
     if (!response.ok) {
       const errorBody = await response.text();
       this.logger.error(`Failed to respond to comment: ${errorBody}`);
@@ -181,19 +289,17 @@ export class InstagramService implements OnModuleInit {
         `Failed to respond to comment: ${response.status}`,
       );
     }
-  
+
     return response.json();
   }
-  
 
   async sendDM(
     { comment: { commentId }, media: { mediaOwnerId } }: any,
     message: string,
+    accountId: number,
   ) {
-    const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-    const { accessToken } =
-      this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
-  
+    const accessToken = await this.getInstagramAccessToken({ accountId });
+
     const url = `https://graph.instagram.com/${mediaOwnerId}/messages`;
     const response = await fetch(url, {
       method: 'POST',
@@ -206,24 +312,25 @@ export class InstagramService implements OnModuleInit {
         message: { text: message },
       }),
     });
-  
+
     if (!response.ok) {
       const errorBody = await response.text();
       this.logger.error(`Failed to send DM: ${errorBody}`);
       throw new InternalServerErrorException(`Failed to send DM`);
     }
-  
+
     return response.json();
   }
-  
 
-  async sendDmForExistingConversation(recipientId: string, message: string) {
-    const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-    const { accessToken } =
-      this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
-  
+  async sendDmForExistingConversation(
+    recipientId: string,
+    message: string,
+    accountId: number,
+  ) {
+    const accessToken = await this.getInstagramAccessToken({ accountId });
+
     const url = `https://graph.instagram.com/${this.myId}/messages`;
-  
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -234,7 +341,7 @@ export class InstagramService implements OnModuleInit {
         access_token: accessToken,
       }),
     });
-  
+
     if (!response.ok) {
       const errorBody = await response.text();
       this.logger.error(`Failed to send DM in conversation: ${errorBody}`);
@@ -242,10 +349,9 @@ export class InstagramService implements OnModuleInit {
         `Failed to send message to existing conversation`,
       );
     }
-  
+
     return response.json();
   }
-  
 
   /**
    * Handles an Instagram comment event:
@@ -301,7 +407,11 @@ export class InstagramService implements OnModuleInit {
     commentText,
     dmText,
   }: GetPromptInput) {
-    const { type: actiontype, information: extractInformation,extra:additionalInformation } = action;
+    const {
+      type: actiontype,
+      information: extractInformation,
+      extra: additionalInformation,
+    } = action;
     const actionCb = this.getActionCb(actiontype);
     if (commentText) {
       const { COMMENTS } = INSTAGRAM_EVENTS;
@@ -311,7 +421,7 @@ export class InstagramService implements OnModuleInit {
         trigger,
         latestConversation: commentText,
         extractInformation,
-        additionalInformation
+        additionalInformation,
       });
       console.log(prompt, '<----prompt');
       return prompt;
@@ -323,7 +433,7 @@ export class InstagramService implements OnModuleInit {
         trigger,
         latestConversation: dmText,
         extractInformation,
-        additionalInformation
+        additionalInformation,
       });
       console.log(prompt, '<----prompt');
       return prompt;
@@ -387,7 +497,7 @@ export class InstagramService implements OnModuleInit {
     };
   }
 
-  async handleComment(webhookPayload: any) {
+  async handleComment(webhookPayload: any, accountId: number) {
     const payload = this.sanitizeCommentPayload(webhookPayload);
     try {
       const {
@@ -399,7 +509,10 @@ export class InstagramService implements OnModuleInit {
         return;
       }
       const { action } = automation;
-      const conversationHistory = await this.getConversation(commenterId);
+      const conversationHistory = await this.getConversation(
+        commenterId,
+        accountId,
+      );
       const prompt = await this.getPrompt({
         action,
         conversationHistory,
@@ -422,14 +535,14 @@ export class InstagramService implements OnModuleInit {
       if (!response) {
         return;
       }
-      await this.sendDM(payload, response);
+      await this.sendDM(payload, response, accountId);
     } catch (error) {
       this.logger.error('Error handling comment event', error.stack);
       throw error;
     }
   }
 
-  async handleDM(webhookPayload: string) {
+  async handleDM(webhookPayload: string, accountId: number) {
     const payload = this.sanitizeDMPayload(webhookPayload);
     const {
       message: { senderId, messageText },
@@ -446,7 +559,7 @@ export class InstagramService implements OnModuleInit {
       automation: { action },
       trigger,
     } = userProgress;
-    const conversationHistory = await this.getConversation(senderId);
+    const conversationHistory = await this.getConversation(senderId, accountId);
     const prompt = await this.getPrompt({
       action,
       conversationHistory,
@@ -458,14 +571,19 @@ export class InstagramService implements OnModuleInit {
     if (!response) {
       return;
     }
-    await this.sendDmForExistingConversation(senderId, response);
+    await this.sendDmForExistingConversation(senderId, response, accountId);
   }
 
-  async getAllPosts({ limit = 10 }) {
+  async getAllPosts({
+    limit = 10,
+    accountId,
+  }: {
+    limit?: number;
+    accountId: number;
+  }) {
     try {
-      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-      const { accessToken } =
-        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+      const accessToken = await this.getInstagramAccessToken({ accountId });
+
       const response = await fetch(
         `https://graph.instagram.com/me/media?fields=id,caption,media_url,media_type,timestamp&limit=${limit}&access_token=${accessToken}`,
       );
@@ -483,11 +601,10 @@ export class InstagramService implements OnModuleInit {
       throw new InternalServerErrorException('Failed to fetch Instagram posts');
     }
   }
-  async getCommentsByPostId(postId: string) {
+  async getCommentsByPostId(postId: string, accountId: number) {
     try {
-      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-      const { accessToken } =
-        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+      const accessToken = await this.getInstagramAccessToken({ accountId });
+
       const response = await fetch(
         `https://graph.instagram.com/${postId}/comments?fields=id,parent_id,text,from{id,username},created_time&access_token=${accessToken}`,
       );
@@ -508,11 +625,10 @@ export class InstagramService implements OnModuleInit {
     }
   }
 
-  async getPostInfoByReplyId(commentId: string) {
+  async getPostInfoByReplyId(commentId: string, accountId: number) {
     try {
-      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-      const { accessToken } =
-        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+      const accessToken = await this.getInstagramAccessToken({ accountId });
+
       const response = await fetch(
         `https://graph.instagram.com/${commentId}?fields=id,parent_id,media,text,from{id,username}&access_token=${accessToken}`,
       );
@@ -542,11 +658,10 @@ export class InstagramService implements OnModuleInit {
     }
   }
 
-  async getConversation(userId: string) {
+  async getConversation(userId: string, accountId: number) {
     try {
-      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-      const { accessToken } =
-        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+      const accessToken = await this.getInstagramAccessToken({ accountId });
+
       const response = await fetch(
         `https://graph.instagram.com/v22.0/me/conversations?user_id${userId}&access_token=${accessToken}&fields=messages{id,created_time,from,message}`,
       );
@@ -568,22 +683,19 @@ export class InstagramService implements OnModuleInit {
     }
   }
 
-  async getPostInfoByMediaId(mediaId: string) {
-    try{
-      const { INSTAGRAM } = WEBHOOK_PROVIDERS;
-      const { accessToken } =
-        this.configService.getOrThrow<InstagramConfig>(INSTAGRAM);
+  async getPostInfoByMediaId(mediaId: string, accountId: number) {
+    try {
+      const accessToken = await this.getInstagramAccessToken({ accountId });
+
       const response = await fetch(
         `https://graph.instagram.com/v22.0/${mediaId}?fields=id,media_type,media_url,owner,timestamp&access_token=${accessToken}`,
       );
-      return await response.json()
-    }
-    catch(error){
+      return await response.json();
+    } catch (error) {
       this.logger.error('Error fetching Instagram post info', error.stack);
       throw new InternalServerErrorException(
         'Failed to fetch Instagram post info',
       );
     }
-
   }
 }

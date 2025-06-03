@@ -8,5 +8,6 @@ import { EncryptionModule } from 'src/encryption/encryption.module';
   imports: [PrismaModule, EncryptionModule],
   controllers: [ConfigurationsController],
   providers: [ConfigurationsService],
+  exports:[ConfigurationsService]
 })
 export class ConfigurationsModule {}

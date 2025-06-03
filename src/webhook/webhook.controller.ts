@@ -42,12 +42,14 @@ export class WebhookController {
     return UNKNOWN;
   }
   @Get(':provider')
-  verifyWebhook(
+  async verifyWebhook(
     @Param('provider') provider: string,
     @Query('hub.challenge') challenge: string,
     @Query('hub.mode') mode: string,
     @Query('hub.verify_token') verifyToken: string,
+    @Query('accountId') accountId: number,
   ) {
+    console.log(accountId,"accountId")
     if (!WEBHOOK_PROVIDERS[provider.toUpperCase()]) {
       return {
         message: `${provider} is not a supported yet.`,
@@ -59,7 +61,7 @@ export class WebhookController {
       };
     }
 
-    if (!this.webhookService.verifyWebhook(verifyToken)) {
+    if (!(await this.webhookService.verifyWebhook(verifyToken, accountId))) {
       return {
         message: 'Invalid token.',
       };
@@ -68,26 +70,36 @@ export class WebhookController {
   }
 
   @Post(':provider')
-  async handleWebhook(@Param('provider') provider: string, @Body() body: any) {
+  async handleWebhook(
+    @Param('provider') provider: string,
+    @Query('accountId') accountId: number,
+    @Body() body: any,
+  ) {
     const { INSTAGRAM } = WEBHOOK_PROVIDERS;
 
+    if (!accountId) {
+      throw new BadRequestException(
+        'Missing required query parameter: accountId',
+      );
+    }
+
     if (provider === INSTAGRAM) {
-      return this.processInstagramWebhook(body);
+      return this.processInstagramWebhook(body, accountId);
     } else if (!WEBHOOK_PROVIDERS.hasOwnProperty(provider)) {
       throw new BadRequestException('Unsupported provider');
     }
   }
 
-  private async processInstagramWebhook(payload: any) {
+  private async processInstagramWebhook(payload: any, accountId: number) {
     try {
       const { COMMENTS, DM_RECEIVED } = INSTAGRAM_EVENTS;
       const eventType = this.instagramService.getInstagramEventType(payload);
       switch (eventType) {
         case DM_RECEIVED:
-          await this.instagramService.handleDM(payload);
+          await this.instagramService.handleDM(payload, accountId);
           break;
         case COMMENTS:
-          await this.instagramService.handleComment(payload);
+          await this.instagramService.handleComment(payload, accountId);
           break;
       }
     } catch (error) {

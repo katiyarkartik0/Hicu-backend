@@ -56,7 +56,7 @@ export class ConfigurationsService {
     accountId,
     integrationName,
   }: {
-    integrationId: number;
+    integrationId?: number;
     accountId: number;
     integrationName?: string;
   }) {
