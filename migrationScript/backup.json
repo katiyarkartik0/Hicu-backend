@@ -1,0 +1,291 @@
+{
+  "accounts": [
+    {
+      "id": 9,
+      "name": "Steel India",
+      "description": "",
+      "website": "",
+      "svgIcon": "",
+      "createdAt": "2025-05-25T18:35:08.984Z",
+      "updatedAt": "2025-05-25T18:35:08.984Z",
+      "members": [
+        {
+          "id": 6,
+          "accountId": 9,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-05-25T18:35:09.003Z",
+          "updatedAt": "2025-05-25T18:35:09.003Z"
+        }
+      ],
+      "configurations": [
+        {
+          "id": 1,
+          "accountId": 9,
+          "integrationId": 1,
+          "config": {
+            "igAccessToken": "c16d009d2cfebe21a2bb8a70c680d522:ba3d77d6d010f368c4d18d12fc5398ae40bbc92de5dd17ae668ed729c50b41c65d18fff9b863afaec9fbc4993e90eb64b2344c8d0c230cd7bacfeab7dc73ba0042854913fe40b4bdac5f05b184883f518f8ce714eeb8ba85212099d498fd35d569fbd6aea0017e48402ec1ae1d9e43a4a3f2685aeb350315a8866fe7b74d3b10bf83b5df665dc24cb7274c82c0fd95128fc0bfc0ec84030f5fa33bec077a4e4dcd8eb3aadb3b2d9cc963ebff364d78bd0e45b58d9be91aaeab38b3325fbfa19a",
+            "webhookSecret": "f76f073ea72b05d876c1c556530cfa10:8903b6e223d120b6cf24e1b6de5c1f0c"
+          }
+        },
+        {
+          "id": 11,
+          "accountId": 9,
+          "integrationId": 2,
+          "config": {
+            "geminiApiKey": "ef150482badbd50f16fb5f0631330873:ba88ec24c5bc2dd42bfcdc4b49e5d09860427886de119f7dc000678a29760c6c"
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Muscleblaze",
+      "description": "",
+      "website": "",
+      "svgIcon": "",
+      "createdAt": "2025-05-31T16:59:24.444Z",
+      "updatedAt": "2025-05-31T16:59:24.444Z",
+      "members": [
+        {
+          "id": 7,
+          "accountId": 10,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-05-31T16:59:24.463Z",
+          "updatedAt": "2025-05-31T16:59:24.463Z"
+        }
+      ],
+      "configurations": []
+    },
+    {
+      "id": 11,
+      "name": "Testing",
+      "description": "",
+      "website": "",
+      "svgIcon": "",
+      "createdAt": "2025-05-31T19:07:27.141Z",
+      "updatedAt": "2025-05-31T19:07:27.141Z",
+      "members": [
+        {
+          "id": 8,
+          "accountId": 11,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-05-31T19:07:27.218Z",
+          "updatedAt": "2025-05-31T19:07:27.218Z"
+        }
+      ],
+      "configurations": []
+    },
+    {
+      "id": 12,
+      "name": "Test 2",
+      "description": "",
+      "website": "",
+      "svgIcon": "",
+      "createdAt": "2025-06-01T14:44:45.240Z",
+      "updatedAt": "2025-06-01T14:44:45.240Z",
+      "members": [
+        {
+          "id": 9,
+          "accountId": 12,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-06-01T14:44:45.272Z",
+          "updatedAt": "2025-06-01T14:44:45.272Z"
+        }
+      ],
+      "configurations": []
+    }
+  ],
+  "members": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "kartik.katiyar@newtonschool.co",
+      "password": "$2b$10$VgE.EEBCGvz1VikOgy1UCOvsUzECmekcDsfAyXh4O3iiOJyPtLkCG",
+      "createdAt": "2025-05-23T15:55:16.393Z",
+      "updatedAt": "2025-05-23T15:55:16.393Z",
+      "accounts": [
+        {
+          "id": 6,
+          "accountId": 9,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-05-25T18:35:09.003Z",
+          "updatedAt": "2025-05-25T18:35:09.003Z"
+        },
+        {
+          "id": 7,
+          "accountId": 10,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-05-31T16:59:24.463Z",
+          "updatedAt": "2025-05-31T16:59:24.463Z"
+        },
+        {
+          "id": 8,
+          "accountId": 11,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-05-31T19:07:27.218Z",
+          "updatedAt": "2025-05-31T19:07:27.218Z"
+        },
+        {
+          "id": 9,
+          "accountId": 12,
+          "memberId": 1,
+          "status": "ACTIVE",
+          "scope": [
+            "SUPER_ADMIN"
+          ],
+          "createdAt": "2025-06-01T14:44:45.272Z",
+          "updatedAt": "2025-06-01T14:44:45.272Z"
+        }
+      ]
+    }
+  ],
+  "accountMembers": [
+    {
+      "id": 6,
+      "accountId": 9,
+      "memberId": 1,
+      "status": "ACTIVE",
+      "scope": [
+        "SUPER_ADMIN"
+      ],
+      "createdAt": "2025-05-25T18:35:09.003Z",
+      "updatedAt": "2025-05-25T18:35:09.003Z"
+    },
+    {
+      "id": 7,
+      "accountId": 10,
+      "memberId": 1,
+      "status": "ACTIVE",
+      "scope": [
+        "SUPER_ADMIN"
+      ],
+      "createdAt": "2025-05-31T16:59:24.463Z",
+      "updatedAt": "2025-05-31T16:59:24.463Z"
+    },
+    {
+      "id": 8,
+      "accountId": 11,
+      "memberId": 1,
+      "status": "ACTIVE",
+      "scope": [
+        "SUPER_ADMIN"
+      ],
+      "createdAt": "2025-05-31T19:07:27.218Z",
+      "updatedAt": "2025-05-31T19:07:27.218Z"
+    },
+    {
+      "id": 9,
+      "accountId": 12,
+      "memberId": 1,
+      "status": "ACTIVE",
+      "scope": [
+        "SUPER_ADMIN"
+      ],
+      "createdAt": "2025-06-01T14:44:45.272Z",
+      "updatedAt": "2025-06-01T14:44:45.272Z"
+    }
+  ],
+  "automations": [],
+  "userProgress": [],
+  "integrations": [
+    {
+      "id": 2,
+      "name": "Gemini",
+      "image": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sparkles-icon lucide-sparkles\"><path d=\"M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z\"/><path d=\"M20 3v4\"/><path d=\"M22 5h-4\"/><path d=\"M4 17v2\"/><path d=\"M5 18H3\"/></svg>",
+      "description": "",
+      "config": [
+        {
+          "name": "geminiApiKey",
+          "type": "text",
+          "displayName": "API Key"
+        }
+      ],
+      "configuraions": [
+        {
+          "id": 11,
+          "accountId": 9,
+          "integrationId": 2,
+          "config": {
+            "geminiApiKey": "ef150482badbd50f16fb5f0631330873:ba88ec24c5bc2dd42bfcdc4b49e5d09860427886de119f7dc000678a29760c6c"
+          }
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "instagram",
+      "image": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-instagram-icon lucide-instagram\"><rect width=\"20\" height=\"20\" x=\"2\" y=\"2\" rx=\"5\" ry=\"5\"/><path d=\"M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z\"/><line x1=\"17.5\" x2=\"17.51\" y1=\"6.5\" y2=\"6.5\"/></svg>",
+      "description": "",
+      "config": [
+        {
+          "name": "igAccessToken",
+          "type": "text",
+          "displayName": "Access Token"
+        },
+        {
+          "name": "webhookSecret",
+          "type": "text",
+          "displayName": "Webhook Secret"
+        }
+      ],
+      "configuraions": [
+        {
+          "id": 1,
+          "accountId": 9,
+          "integrationId": 1,
+          "config": {
+            "igAccessToken": "c16d009d2cfebe21a2bb8a70c680d522:ba3d77d6d010f368c4d18d12fc5398ae40bbc92de5dd17ae668ed729c50b41c65d18fff9b863afaec9fbc4993e90eb64b2344c8d0c230cd7bacfeab7dc73ba0042854913fe40b4bdac5f05b184883f518f8ce714eeb8ba85212099d498fd35d569fbd6aea0017e48402ec1ae1d9e43a4a3f2685aeb350315a8866fe7b74d3b10bf83b5df665dc24cb7274c82c0fd95128fc0bfc0ec84030f5fa33bec077a4e4dcd8eb3aadb3b2d9cc963ebff364d78bd0e45b58d9be91aaeab38b3325fbfa19a",
+            "webhookSecret": "f76f073ea72b05d876c1c556530cfa10:8903b6e223d120b6cf24e1b6de5c1f0c"
+          }
+        }
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "id": 1,
+      "accountId": 9,
+      "integrationId": 1,
+      "config": {
+        "igAccessToken": "c16d009d2cfebe21a2bb8a70c680d522:ba3d77d6d010f368c4d18d12fc5398ae40bbc92de5dd17ae668ed729c50b41c65d18fff9b863afaec9fbc4993e90eb64b2344c8d0c230cd7bacfeab7dc73ba0042854913fe40b4bdac5f05b184883f518f8ce714eeb8ba85212099d498fd35d569fbd6aea0017e48402ec1ae1d9e43a4a3f2685aeb350315a8866fe7b74d3b10bf83b5df665dc24cb7274c82c0fd95128fc0bfc0ec84030f5fa33bec077a4e4dcd8eb3aadb3b2d9cc963ebff364d78bd0e45b58d9be91aaeab38b3325fbfa19a",
+        "webhookSecret": "f76f073ea72b05d876c1c556530cfa10:8903b6e223d120b6cf24e1b6de5c1f0c"
+      }
+    },
+    {
+      "id": 11,
+      "accountId": 9,
+      "integrationId": 2,
+      "config": {
+        "geminiApiKey": "ef150482badbd50f16fb5f0631330873:ba88ec24c5bc2dd42bfcdc4b49e5d09860427886de119f7dc000678a29760c6c"
+      }
+    }
+  ]
+}

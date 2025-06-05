@@ -6,16 +6,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class AutomationsService {
   constructor(private readonly prismaService: PrismaService) {}
-  create(createAutomationDto: any) {
+  create(createAutomationDto: CreateAutomationDto) {
     return this.prismaService.automation.create({ data: createAutomationDto });
   }
 
-  findAll() {
-    return this.prismaService.automation.findMany();
+  findAll({ accountId }: { accountId: number }) {
+    return this.prismaService.automation.findMany({ where: { accountId } });
   }
 
-  findOne(mediaId: string) {
-    return this.prismaService.automation.findFirst({ where: { mediaId } });
+  findOne(id: number) {
+    return this.prismaService.automation.findFirst({ where: { id } });
   }
 
   findByMedia(mediaId: string) {
@@ -26,7 +26,10 @@ export class AutomationsService {
     return `This action updates a #${id} automation`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} automation`;
+  async remove(id: number) {
+    await this.prismaService.userProgress.deleteMany({
+      where: { automationId: id },
+    });
+    return this.prismaService.automation.delete({ where: { id } });
   }
 }

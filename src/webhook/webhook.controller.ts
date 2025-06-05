@@ -49,7 +49,6 @@ export class WebhookController {
     @Query('hub.verify_token') verifyToken: string,
     @Query('accountId') accountId: number,
   ) {
-    console.log(accountId,"accountId")
     if (!WEBHOOK_PROVIDERS[provider.toUpperCase()]) {
       return {
         message: `${provider} is not a supported yet.`,
@@ -93,7 +92,10 @@ export class WebhookController {
   private async processInstagramWebhook(payload: any, accountId: number) {
     try {
       const { COMMENTS, DM_RECEIVED } = INSTAGRAM_EVENTS;
-      const eventType = this.instagramService.getInstagramEventType(payload);
+      const eventType = await this.instagramService.getInstagramEventType(
+        payload,
+        accountId,
+      );
       switch (eventType) {
         case DM_RECEIVED:
           await this.instagramService.handleDM(payload, accountId);

@@ -5,16 +5,15 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, Type } from '@google/genai';
+import { CONFIGURATIONS_VARIABLES } from 'src/shared/constants';
+import { ConfigurationsService } from 'src/configurations/configurations.service';
 
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
   private readonly AI: any;
 
-  constructor(private readonly configService: ConfigService) {
-    const { geminiApiKey } = this.configService.getOrThrow<any>('gemini');
-    this.AI = new GoogleGenAI({ apiKey: geminiApiKey });
-  }
+  constructor(private readonly configurationsService: ConfigurationsService) {}
 
   /**
    * Generates a prompt for classifying a customer interaction
@@ -144,9 +143,31 @@ export class GeminiService {
     }
   }
 
-  async queryGemini(prompt: string): Promise<any> {
+  private async getGeminiApiKey({
+    accountId,
+  }: {
+    accountId: number;
+  }): Promise<string> {
+    const { config: configurations } =
+      await this.configurationsService.getConfigurationForAccount({
+        integrationName: 'Gemini',
+        accountId,
+      });
+    const geminiApiKey =
+      configurations[CONFIGURATIONS_VARIABLES.GEMINI.ACCESS_TOKEN];
+    return geminiApiKey;
+  }
+
+  async queryGemini(prompt: string, accountId: number): Promise<any> {
     try {
-      const response = await this.AI.models.generateContent({
+      const geminiApiKey = await this.getGeminiApiKey({ accountId });
+      console.log(geminiApiKey,'damn');
+      if (!geminiApiKey) {
+        console.log(geminiApiKey,'damn');
+        return;
+      }
+      const AI = new GoogleGenAI({ apiKey: geminiApiKey });
+      const response = await AI.models.generateContent({
         model: 'gemini-2.0-flash-001',
         contents: prompt,
         config: {
@@ -158,7 +179,8 @@ export class GeminiService {
           },
         },
       });
-      return JSON.parse(response.text);
+console.log(response,"ai response")
+      return response.text && JSON.parse(response.text);
     } catch (error) {
       this.logger.error('Error calling Gemini API', error);
       throw new InternalServerErrorException(

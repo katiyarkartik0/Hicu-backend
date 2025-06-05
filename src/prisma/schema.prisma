@@ -19,6 +19,7 @@ model Account {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   configurations Configurations[]
+  Automation     Automation[]
 }
 
 model Member {
@@ -59,8 +60,10 @@ enum MemberStatus {
 model Automation {
   id           Int            @id @default(autoincrement())
   mediaId      String
+  accountId    Int
   action       Json
   UserProgress UserProgress[]
+  account      Account        @relation(fields: [accountId], references: [id])
 }
 
 model UserProgress {

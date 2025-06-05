@@ -60,28 +60,17 @@ type UserProfile = {
 };
 
 @Injectable()
-export class InstagramService implements OnModuleInit {
+export class InstagramService {
   private readonly logger = new Logger(InstagramService.name);
 
-  myId: string;
-  myUsername: string;
-
   constructor(
-    private readonly configService: ConfigService,
     private readonly geminiService: GeminiService,
     private readonly automationService: AutomationsService,
     private readonly prismaService: PrismaService,
     private readonly configurationsService: ConfigurationsService,
   ) {}
 
-  async onModuleInit() {
-    const { id, username } = await this.getMyDetails({ accountId: 9 });
-    this.myId = id;
-    this.myUsername = username;
-    this.logger.log(`Loaded Instagram account: ${username} (${id})`);
-  }
-
-  getInstagramEventType(body: any): string {
+  async getInstagramEventType(body: any, accountId: number): Promise<string> {
     const { INVALID, DM_RECEIVED, DM_ECHO, COMMENTS, COMMENT_ECHO, UNKNOWN } =
       INSTAGRAM_EVENTS;
 
@@ -95,8 +84,8 @@ export class InstagramService implements OnModuleInit {
       const comment = entry.changes?.[0]?.value;
       const commenterId = comment?.from?.id;
       const commenterUsername = comment?.from?.username;
-
-      if (commenterId === this.myId || commenterUsername === this.myUsername) {
+      const { id, username } = await this.getMyDetails({ accountId });
+      if (commenterId === id || commenterUsername === username) {
         return COMMENT_ECHO;
       } else {
         return COMMENTS;
@@ -328,8 +317,9 @@ export class InstagramService implements OnModuleInit {
     accountId: number,
   ) {
     const accessToken = await this.getInstagramAccessToken({ accountId });
+    const { id, username } = await this.getMyDetails({ accountId });
 
-    const url = `https://graph.instagram.com/${this.myId}/messages`;
+    const url = `https://graph.instagram.com/${id}/messages`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -423,7 +413,6 @@ export class InstagramService implements OnModuleInit {
         extractInformation,
         additionalInformation,
       });
-      console.log(prompt, '<----prompt');
       return prompt;
     } else if (dmText) {
       const { DM_RECEIVED } = INSTAGRAM_EVENTS;
@@ -435,14 +424,12 @@ export class InstagramService implements OnModuleInit {
         extractInformation,
         additionalInformation,
       });
-      console.log(prompt, '<----prompt');
       return prompt;
     }
     throw new Error('Unidentified event cannot generate prompt');
   }
 
   private sanitizeCommentPayload(payload: any) {
-    console.log(JSON.stringify(payload, null, 2));
     const commentId = payload.entry[0].changes[0].value.id;
     const commenterUsername = payload.entry[0].changes[0].value.from.username;
     const mediaOwnerId = payload.entry[0].id;
@@ -520,7 +507,7 @@ export class InstagramService implements OnModuleInit {
         commentText,
       });
 
-      const response = await this.geminiService.queryGemini(prompt);
+      const response = await this.geminiService.queryGemini(prompt, accountId);
       await this.prismaService.userProgress.upsert({
         where: { userId: commenterId },
         update: { automationId: automation.id, trigger: commentText },
@@ -530,7 +517,6 @@ export class InstagramService implements OnModuleInit {
           trigger: commentText,
         },
       });
-      console.log(response, '<----response');
 
       if (!response) {
         return;
@@ -566,8 +552,7 @@ export class InstagramService implements OnModuleInit {
       trigger,
       dmText: messageText,
     });
-    const response = await this.geminiService.queryGemini(prompt);
-    console.log(response, '<----response');
+    const response = await this.geminiService.queryGemini(prompt, accountId);
     if (!response) {
       return;
     }

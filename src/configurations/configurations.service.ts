@@ -112,7 +112,6 @@ export class ConfigurationsService {
 
       return { ...integration, config };
     });
-    console.log(res);
     return res;
   }
 }

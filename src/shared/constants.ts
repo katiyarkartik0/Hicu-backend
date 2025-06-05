@@ -8,4 +8,7 @@ export const CONFIGURATIONS_VARIABLES = {
     ACCESS_TOKEN: 'igAccessToken',
     WEBHOOK_SECRET: 'webhookSecret',
   },
+  GEMINI:{
+    ACCESS_TOKEN:'geminiApiKey'
+  }
 };
