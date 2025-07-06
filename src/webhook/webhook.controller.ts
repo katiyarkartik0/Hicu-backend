@@ -10,14 +10,16 @@ import {
 } from '@nestjs/common';
 import { WEBHOOK_PROVIDERS } from './types/webhook.types';
 import { WebhookService } from './webhook.service';
-import { INSTAGRAM_EVENTS } from './providers/instagram/constants/instagram.events';
-import { InstagramService } from './providers/instagram/instagram.service';
+import { InstagramService } from '../providers/instagram/instagram.service';
+import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
+import { McpService } from 'src/mcp/mcp.service';
 
 @Controller('webhook')
 export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
     private readonly instagramService: InstagramService,
+    private readonly mcqService:McpService
   ) {}
 
   private getInstagramEventType(body: any): string {
@@ -81,7 +83,6 @@ export class WebhookController {
         'Missing required query parameter: accountId',
       );
     }
-
     if (provider === INSTAGRAM) {
       return this.processInstagramWebhook(body, accountId);
     } else if (!WEBHOOK_PROVIDERS.hasOwnProperty(provider)) {
@@ -98,10 +99,10 @@ export class WebhookController {
       );
       switch (eventType) {
         case DM_RECEIVED:
-          await this.instagramService.handleDM(payload, accountId);
+          // await this.instagramService.handleDM(payload, accountId);
           break;
         case COMMENTS:
-          await this.instagramService.handleComment(payload, accountId);
+          await this.mcqService.handleIgWebhook(payload, accountId);
           break;
       }
     } catch (error) {

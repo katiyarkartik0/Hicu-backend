@@ -22,7 +22,7 @@ import { ConfigurationsModule } from 'src/configurations/configurations.module';
     PrismaModule,
     ConfigurationsModule,
   ],
-  controllers: [InstagramController], // <-- ADD THIS LINE
+  controllers: [InstagramController],
   providers: [InstagramService],
   exports: [InstagramService],
 })

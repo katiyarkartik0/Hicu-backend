@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { InstagramModule } from './webhook/providers/instagram/instagram.module';
+import { InstagramModule } from './providers/instagram/instagram.module';
 import { ConfigModule } from '@nestjs/config';
 import { WebhookModule } from './webhook/webhook.module';
 import { AuthModule } from './auth/auth.module';
@@ -16,6 +16,10 @@ import { AutomationsModule } from './automations/automations.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { ConfigurationsModule } from './configurations/configurations.module';
 import { EncryptionModule } from './encryption/encryption.module';
+import { ShopifyModule } from './shopify/shopify.module';
+import { McpModule } from './mcp/mcp.module';
+import { PineconeModule } from './pinecone/pinecone.module';
+import { LeadsModule } from './leads/leads.module';
 
 @Module({
   imports: [
@@ -37,7 +41,11 @@ import { EncryptionModule } from './encryption/encryption.module';
     AutomationsModule,
     IntegrationsModule,
     ConfigurationsModule,
-    EncryptionModule
+    EncryptionModule,
+    ShopifyModule,
+    McpModule,
+    PineconeModule,
+    LeadsModule
   ],
   controllers: [AppController],
   providers: [AppService],

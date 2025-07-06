@@ -1,12 +1,12 @@
-import { IsInt, IsString, IsObject } from 'class-validator'
+import { IsInt, IsString, IsObject } from 'class-validator';
 
 export class CreateAutomationDto {
   @IsString()
-  mediaId: string
+  mediaId: string;
 
   @IsInt()
-  accountId: number
+  accountId: number;
 
   @IsObject()
-  action: Record<string, any>
+  requirements: Record<string, any>;
 }

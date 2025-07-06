@@ -5,17 +5,17 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InstagramConfig } from './instagram.types';
+import { InstagramConfig, InstagramConversation } from './instagram.types';
 import { WEBHOOK_PROVIDERS } from 'src/webhook/types/webhook.types';
 import { CreateCommentDto } from './dto/webhook.dto';
 import { ReplyModel } from './instagram.schema';
 import { registeredActions } from 'src/shared/prompts/prompts';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { AutomationsService } from 'src/automations/automations.service';
-import { INSTAGRAM_EVENTS } from './constants/instagram.events';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CONFIGURATIONS_VARIABLES } from 'src/shared/constants';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
+import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
 
 type CommentInput = {
   action: any;
@@ -282,6 +282,9 @@ export class InstagramService {
     return response.json();
   }
 
+  /**
+   slide into DMs of the commenter
+   * */
   async sendDM(
     { comment: { commentId }, media: { mediaOwnerId } }: any,
     message: string,
@@ -317,9 +320,11 @@ export class InstagramService {
     accountId: number,
   ) {
     const accessToken = await this.getInstagramAccessToken({ accountId });
-    const { id, username } = await this.getMyDetails({ accountId });
+    const { id } = await this.getMyDetails({ accountId });
 
     const url = `https://graph.instagram.com/${id}/messages`;
+
+    console.log(message, '[sendDmForExistingConversation]: message to send in dm');
 
     const response = await fetch(url, {
       method: 'POST',
@@ -341,6 +346,46 @@ export class InstagramService {
     }
 
     return response.json();
+  }
+
+  async sendImageInDm({ recipientId, imageUrl, accountId }) {
+    const accessToken = await this.getInstagramAccessToken({ accountId });
+    const { id, username } = await this.getMyDetails({ accountId });
+    const payload = {
+      recipient: { id: recipientId },
+      message: {
+        attachment: {
+          type: 'image',
+          payload: {
+            url: imageUrl,
+          },
+        },
+      },
+    };
+    try {
+      const response = await fetch(
+        `https://graph.instagram.com/v21.0/${id}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+      if (!response.ok) {
+        const errorBody = await response.text();
+        this.logger.error(`Failed to send DM in conversation: ${errorBody}`);
+        throw new InternalServerErrorException(
+          `Failed to send message to existing conversation`,
+        );
+      }
+
+      return response.json();
+    } catch (err) {
+      console.log(`[ERROR]: ${err}`);
+    }
   }
 
   /**
@@ -484,81 +529,6 @@ export class InstagramService {
     };
   }
 
-  async handleComment(webhookPayload: any, accountId: number) {
-    const payload = this.sanitizeCommentPayload(webhookPayload);
-    try {
-      const {
-        comment: { commentText, commenterId },
-        media: { mediaId },
-      } = payload;
-      const automation = await this.automationService.findByMedia(mediaId);
-      if (!automation) {
-        return;
-      }
-      const { action } = automation;
-      const conversationHistory = await this.getConversation(
-        commenterId,
-        accountId,
-      );
-      const prompt = await this.getPrompt({
-        action,
-        conversationHistory,
-        trigger: commentText,
-        commentText,
-      });
-
-      const response = await this.geminiService.queryGemini(prompt, accountId);
-      await this.prismaService.userProgress.upsert({
-        where: { userId: commenterId },
-        update: { automationId: automation.id, trigger: commentText },
-        create: {
-          automationId: automation.id,
-          userId: commenterId,
-          trigger: commentText,
-        },
-      });
-
-      if (!response) {
-        return;
-      }
-      await this.sendDM(payload, response, accountId);
-    } catch (error) {
-      this.logger.error('Error handling comment event', error.stack);
-      throw error;
-    }
-  }
-
-  async handleDM(webhookPayload: string, accountId: number) {
-    const payload = this.sanitizeDMPayload(webhookPayload);
-    const {
-      message: { senderId, messageText },
-    } = payload;
-
-    const userProgress = await this.prismaService.userProgress.findUnique({
-      where: { userId: senderId },
-      include: { automation: true },
-    });
-    if (!userProgress) {
-      return;
-    }
-    const {
-      automation: { action },
-      trigger,
-    } = userProgress;
-    const conversationHistory = await this.getConversation(senderId, accountId);
-    const prompt = await this.getPrompt({
-      action,
-      conversationHistory,
-      trigger,
-      dmText: messageText,
-    });
-    const response = await this.geminiService.queryGemini(prompt, accountId);
-    if (!response) {
-      return;
-    }
-    await this.sendDmForExistingConversation(senderId, response, accountId);
-  }
-
   async getAllPosts({
     limit = 10,
     accountId,
@@ -643,12 +613,15 @@ export class InstagramService {
     }
   }
 
+  /**
+   * @deprecated Use getConversationHistory instead.
+   */
   async getConversation(userId: string, accountId: number) {
     try {
       const accessToken = await this.getInstagramAccessToken({ accountId });
 
       const response = await fetch(
-        `https://graph.instagram.com/v22.0/me/conversations?user_id${userId}&access_token=${accessToken}&fields=messages{id,created_time,from,message}`,
+        `https://graph.instagram.com/v22.0/me/conversations?user_id=${userId}&access_token=${accessToken}&fields=messages{id,created_time,from,message}`,
       );
 
       const { data } = await response.json();
@@ -666,6 +639,32 @@ export class InstagramService {
         'Failed to fetch Instagram conversation',
       );
     }
+  }
+
+  async getConversationHistory(
+    userId: string,
+    accountId: number,
+  ): Promise<InstagramConversation | undefined> {
+    const accessToken = await this.getInstagramAccessToken({ accountId });
+    try {
+      const params = new URLSearchParams({
+        user_id: userId,
+        access_token: accessToken,
+        fields: 'messages{id,created_time,from,message}',
+        limit: '8',
+      });
+      const response = await fetch(
+        `https://graph.instagram.com/v22.0/me/conversations?${params.toString()}`,
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Instagram API error: ${response.status} ${error}`);
+      }
+
+      const { data } = await response.json();
+      return data[0] as InstagramConversation;
+    } catch (err) {}
   }
 
   async getPostInfoByMediaId(mediaId: string, accountId: number) {

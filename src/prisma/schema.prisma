@@ -16,10 +16,13 @@ model Account {
   website     String?
   svgIcon     String?
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  configurations Configurations[]
-  Automation     Automation[]
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  configurations      Configurations[]
+  Prospect            Prospect[]
+  IgCommentAutomation IgCommentAutomation[]
+  IgDmAutomation      IgDmAutomation[]
+  Leads               Leads[]
 }
 
 model Member {
@@ -57,21 +60,40 @@ enum MemberStatus {
   REMOVED
 }
 
-model Automation {
-  id           Int            @id @default(autoincrement())
-  mediaId      String
-  accountId    Int
-  action       Json
-  UserProgress UserProgress[]
-  account      Account        @relation(fields: [accountId], references: [id])
+model IgCommentAutomation {
+  id                  Int     @id @default(autoincrement())
+  mediaId             String  @unique
+  accountId           Int
+  commentAutomationId Int     @default(0)
+  account             Account @relation(fields: [accountId], references: [id])
 }
 
-model UserProgress {
-  id           Int        @id @default(autoincrement())
-  automationId Int
-  automation   Automation @relation(fields: [automationId], references: [id])
-  userId       String     @unique
-  trigger      String
+model IgDmAutomation {
+  id             Int     @id @default(autoincrement())
+  accountId      Int
+  dmAutomationId Int
+  account        Account @relation(fields: [accountId], references: [id])
+}
+
+//keeps details of leads generation questions to be asked
+model Leads {
+  id                                Int     @id @default(autoincrement())
+  accountId                         Int     @unique
+  requirements                      Json
+  maxGenerationAttemptsPerProspect  Int
+  minGapBetweenPerGenerationAttempt Int
+  account                           Account @relation(fields: [accountId], references: [id])
+}
+
+model Prospect {
+  id                           Int     @id @default(autoincrement())
+  userId                       String
+  username                     String
+  accountId                    Int
+  details                      String[]
+  lastLeadsGenerationAttempt   Int
+  totalLeadsGenerationAttempts Int
+  account                      Account @relation(fields: [accountId], references: [id])
 }
 
 //this has been created so that this could be sent to FE to render a page to display all the featured integrations, config to render the form

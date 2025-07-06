@@ -3,45 +3,50 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
 import { AutomationsService } from './automations.service';
-import { CreateAutomationDto } from './dto/create-automation.dto';
-import { UpdateAutomationDto } from './dto/update-automation.dto';
+import { Automation, IgCommentAutomation } from './automations.types';
+import { IgDmAutomation } from '@prisma/client';
 
 @Controller('automations')
 export class AutomationsController {
   constructor(private readonly automationsService: AutomationsService) {}
 
   @Post()
-  create(@Body() createAutomationDto: CreateAutomationDto) {
-    return this.automationsService.create(createAutomationDto);
+  async create(@Body() createAutomationDto: Omit<Automation, 'id'>) {
+    const automation =
+      await this.automationsService.create(createAutomationDto);
+    return { data: automation };
   }
 
   @Get()
   async findAll(@Query('accountId') accountId: number) {
     const automations = await this.automationsService.findAll({ accountId });
-    return automations;
-
+    return { data: automations };
   }
-
-  @Get(':mediaId')
-  async findOne(@Param('mediaId') mediaId: string) {
-    const automation =  await this.automationsService.findByMedia(mediaId);
-    return automation;
-  }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAutomationDto: UpdateAutomationDto) {
-  //   return this.automationsService.update(id, updateAutomationDto);
-  // }
 
   @Delete(':automationId')
   async delete(@Param('automationId', ParseIntPipe) automationId: number) {
     return this.automationsService.remove(automationId);
+  }
+
+  @Post('/igComment')
+  commentAutomation(@Body() body: Omit<IgCommentAutomation, 'id'>) {
+    return this.automationsService.createIgCommentAutomation(body);
+  }
+
+  @Post('/igDm')
+  dmAutomation(@Body() body: Omit<IgDmAutomation, 'id'>) {
+    return this.automationsService.createIgDmAutomation(body);
+  }
+
+  @Get('/igComment')
+  async findAllIgCommentAutomations(@Query('accountId') accountId: number) {
+    const automations = await this.automationsService.findAllIgCommentAutomation({ accountId });
+    return { data: automations };
   }
 }

@@ -1,4 +1,4 @@
-import { INSTAGRAM_EVENTS } from 'src/webhook/providers/instagram/constants/instagram.events';
+import { INSTAGRAM_EVENTS } from "../constants/instagram/events.constants";
 
 const { COMMENTS, DM_RECEIVED } = INSTAGRAM_EVENTS;
 

@@ -9,8 +9,8 @@ async function backup() {
     accounts: await prisma.account.findMany({ include: { members: true, configurations: true} }),
     members: await prisma.member.findMany({ include: { accounts: true } }),
     accountMembers: await prisma.accountMember.findMany(),
-    automations: await prisma.automation.findMany({ include: { UserProgress: true } }),
-    userProgress: await prisma.userProgress.findMany(),
+    // automations: await prisma.automation.findMany({ include: { UserProgress: true } }),
+    // userProgress: await prisma.userProgress.findMany(),
     integrations: await prisma.integration.findMany({ include: { configuraions: true } }),
     configurations: await prisma.configurations.findMany()
   }

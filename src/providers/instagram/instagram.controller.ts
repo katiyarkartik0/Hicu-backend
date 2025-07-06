@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { InstagramService } from './instagram.service';
-import { INSTAGRAM_EVENTS } from './constants/instagram.events';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @UseGuards(AuthGuard)

@@ -12,7 +12,6 @@ import { AccountService } from './account.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { MemberStatus } from '@prisma/client';
 
 @UseGuards(AuthGuard)
 @Controller('accounts')
