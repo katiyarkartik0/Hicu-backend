@@ -12,19 +12,15 @@ import type {
 export class AutomationsService {
   constructor(private readonly prismaService: PrismaService) {}
   create(createAutomationDto: Omit<Automation, 'id'>) {
-    return this.prismaService.automation.create({ data: createAutomationDto });
   }
 
   findAll({ accountId }: { accountId: number }) {
-    return this.prismaService.automation.findMany({ where: { accountId } });
   }
 
   findOne(id: number) {
-    return this.prismaService.automation.findFirst({ where: { id } });
   }
 
   findByMedia(mediaId: string) {
-    return this.prismaService.automation.findUnique({ where: { mediaId } });
   }
 
   update(id: number, updateAutomationDto: UpdateAutomationDto) {
