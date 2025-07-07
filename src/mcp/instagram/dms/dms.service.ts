@@ -4,7 +4,6 @@ import { CommentGraphService } from '../comments/comment-graph.service';
 import { InstagramUtilsService } from '../instagram-utils.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LeadsAsked } from 'src/automations/automations.types';
 
 @Injectable()
 export class DmsService {

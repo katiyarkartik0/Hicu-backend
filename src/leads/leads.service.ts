@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateLeadDto } from './dto/create-lead.dto';
-import { UpdateLeadDto } from './dto/update-lead.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LeadsAsked } from 'src/automations/automations.types';
+import { Leads as LeadsAsked } from './dto/create-lead.dto';
 
 @Injectable()
 export class LeadsService {
   constructor(private readonly prismaService: PrismaService) {}
-  create(createLeadDto: CreateLeadDto) {
+  create(createLeadDto) {
     return 'This action adds a new lead';
   }
 
@@ -19,7 +17,7 @@ export class LeadsService {
     return `This action returns a #${id} lead`;
   }
 
-  update(id: number, updateLeadDto: UpdateLeadDto) {
+  update(id: number, updateLeadDto) {
     return `This action updates a #${id} lead`;
   }
 

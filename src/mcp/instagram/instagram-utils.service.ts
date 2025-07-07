@@ -1,10 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type {
-  AccountIG,
-  ConversationHistory,
-  Prospect,
-  SanitizedCommentPayload,
-} from './comments/comments.types';
+import type { CommentLlmGraphState } from './comments/comments.types';
 import { InstagramMessage } from 'src/providers/instagram/instagram.types';
 import { Type } from '@google/genai';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
@@ -18,7 +13,7 @@ export class InstagramUtilsService {
   /**
    * Extracts and formats comment + media info from raw webhook payload.
    */
-  sanitizeCommentPayload(payload: any): SanitizedCommentPayload {
+  sanitizeCommentPayload(payload: any): CommentLlmGraphState['commentPayload'] {
     try {
       const change = payload.entry[0].changes[0].value;
 
@@ -68,12 +63,12 @@ export class InstagramUtilsService {
    */
   sanitizeHistory(
     data: InstagramMessage[],
-    prospectIgUserId: Prospect['userId'],
-    accountIgUserId: AccountIG['userId'],
-  ): ConversationHistory {
+    prospectIgUserId: string,
+    accountIgUserId: string,
+  ): CommentLlmGraphState['conversationHistory'] {
     const history: {
-      prospect: ConversationHistory['prospect'];
-      account: ConversationHistory['account'];
+      prospect: CommentLlmGraphState['conversationHistory']['prospect'];
+      account: CommentLlmGraphState['conversationHistory']['account'];
     } = {
       prospect: [],
       account: [],

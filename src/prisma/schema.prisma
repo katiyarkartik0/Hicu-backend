@@ -90,7 +90,7 @@ model Prospect {
   userId                       String
   username                     String
   accountId                    Int
-  details                      String[]
+  details                      Json
   lastLeadsGenerationAttempt   Int
   totalLeadsGenerationAttempts Int
   account                      Account @relation(fields: [accountId], references: [id])

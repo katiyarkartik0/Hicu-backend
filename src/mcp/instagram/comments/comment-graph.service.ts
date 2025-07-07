@@ -1,21 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiPromptService } from './gemini-prompt.service';
 import { StateGraph, StateGraphArgs } from '@langchain/langgraph';
-import {
-  CommentLlmGraphState,
-  ConversationHistory,
-  Leads,
-  ServiceContext,
-} from './comments.types';
+
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
 import { AutomationsService } from 'src/automations/automations.service';
-import {
-  Automation,
-  IgCommentAutomation,
-  LeadsAsked,
-} from 'src/automations/automations.types';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
+import { GeminiPromptService } from './gemini-prompt.service';
+
+import type { CommentLlmGraphState } from './comments.types';
 
 @Injectable()
 export class CommentGraphService {
@@ -27,22 +19,24 @@ export class CommentGraphService {
     private pineconeService: PineconeService,
     private readonly automationService: AutomationsService,
     private readonly geminiService: GeminiService,
-  ) {}
+  ) {
+    // automationService and geminiService are imported for this binding do not remove
+  }
 
   getGraphChannels(): StateGraphArgs<CommentLlmGraphState>['channels'] {
     return {
-      history: {
-        reducer: (prev: ConversationHistory) => {
+      conversationHistory: {
+        reducer: (prev: CommentLlmGraphState['conversationHistory']) => {
           return prev;
         },
       },
       commentPayload: {
         reducer: (prev) => prev,
       },
-      accountIg: {
+      igAccount: {
         reducer: (prev) => {
           if (!prev || !prev.userId) {
-            throw new Error('accountIg must be set and have an id');
+            throw new Error('igAccount must be set and have an id');
           }
           return prev;
         },
@@ -56,23 +50,23 @@ export class CommentGraphService {
         },
       },
       leadsAsked: {
-        reducer: (_, next: LeadsAsked) => next,
+        reducer: (_, next: CommentLlmGraphState['leadsAsked']) => next,
       },
       accountId: {
         reducer: (prev: number) => prev,
       },
       services: {
-        reducer: (prev: ServiceContext[]) => prev,
+        reducer: (prev: CommentLlmGraphState['services']) => prev,
       },
       igCommentAutomation: {
-        reducer: (prev: IgCommentAutomation) => prev,
+        reducer: (prev: CommentLlmGraphState['igCommentAutomation']) => prev,
       },
     };
   }
   async runGraph({
-    history,
+    conversationHistory,
     commentPayload,
-    accountIg,
+    igAccount,
     prospect,
     accountId,
     services,
@@ -99,9 +93,9 @@ export class CommentGraphService {
       const graph = graphBuilder.compile();
 
       await graph.invoke({
-        history,
+        conversationHistory,
         commentPayload,
-        accountIg,
+        igAccount,
         prospect,
         accountId,
         services,
@@ -124,15 +118,18 @@ export class CommentGraphService {
         accountId,
       );
 
-      console.log(response, '[feedback response]');
+      this.logger.log(response, '[feedback responsesss]');
 
-      await this.instagramService.respondToComment(
-        commentId,
-        response,
-        accountId,
-      );
+      // await this.instagramService.respondToComment(
+      //   commentId,
+      //   response,
+      //   accountId,
+      // );
+      console.log('respondToFeedbackInComments completed, moving to leadsNode');
 
+      // this.logger.log('respondToFeedbackInComments completed, moving to leadsNode');
       return state;
+
     } catch (error) {
       this.logger.error(
         `Failed to respond to feedback in comment: ${commentId}`,
@@ -147,54 +144,73 @@ export class CommentGraphService {
   }
 
   async generateLeadsInDm(state: CommentLlmGraphState) {
-    const now = Date.now();
+    try {
+      const now = Date.now();
 
-    const {
-      leadsAsked: {
-        maxGenerationAttemptsPerProspect,
-        minGapBetweenPerGenerationAttempt,
-        requirements,
-      },
-      prospect: {
-        details,
-        lastLeadsGenerationAttempt,
-        totalLeadsGenerationAttempts,
-      },
-      commentPayload: {
-        comment: { commentText, commentId },
-        media: { mediaOwnerId },
-      },
-      accountId,
-    } = state;
+      const {
+        leadsAsked: {
+          maxGenerationAttemptsPerProspect,
+          minGapBetweenPerGenerationAttempt,
+          requirements,
+        },
+        prospect: {
+          details,
+          lastLeadsGenerationAttempt,
+          totalLeadsGenerationAttempts,
+        },
+        commentPayload: {
+          comment: { commentText, commentId },
+          media: { mediaOwnerId },
+        },
+        accountId,
+      } = state;
 
-    const canGenerate =
-      totalLeadsGenerationAttempts < maxGenerationAttemptsPerProspect &&
-      now - lastLeadsGenerationAttempt >= minGapBetweenPerGenerationAttempt;
+      const canGenerate =
+        totalLeadsGenerationAttempts < maxGenerationAttemptsPerProspect &&
+        now - lastLeadsGenerationAttempt >= minGapBetweenPerGenerationAttempt;
 
-    if (!canGenerate) {
-      return { ...state, response: '' };
+      if (!canGenerate) {
+        this.logger.log(
+          `Skipping lead generation. Attempts: ${totalLeadsGenerationAttempts}/${maxGenerationAttemptsPerProspect}, Time gap OK: ${
+            now - lastLeadsGenerationAttempt
+          } >= ${minGapBetweenPerGenerationAttempt}`,
+        );
+
+        return { ...state, response: '' };
+      }
+
+      const response =
+        await this.geminiPromptService.generateLeadsExtractionText(
+          details,
+          requirements,
+          commentText,
+          accountId,
+        );
+
+      this.logger.log(`Generated leads response: ${response}`);
+
+      await this.instagramService.sendDM(
+        {
+          comment: { commentId },
+          media: { mediaOwnerId },
+        },
+        response,
+        accountId,
+      );
+
+      this.logger.log(`Sent DM for commentId: ${commentId}`);
+
+      return { ...state, response }; // Include response in state for tracking
+    } catch (error) {
+      this.logger.error(
+        `Failed to generate or send leads in DM: ${error.message}`,
+        error.stack,
+      );
+      return { ...state, response: '' }; // Return safe fallback state
     }
-
-    const response = await this.geminiPromptService.generateLeadsExtractionText(
-      details,
-      requirements,
-      commentText,
-      accountId,
-    );
-
-    console.log(response, '[generate leads in dm]');
-
-    await this.instagramService.sendDM(
-      {
-        comment: { commentId },
-        media: { mediaOwnerId },
-      },
-      response,
-      accountId,
-    );
   }
   async handleProductEnquiry(state: CommentLlmGraphState) {
-    const { accountId, history, services, commentPayload } = state;
+    const { accountId, services, commentPayload } = state;
 
     try {
       const result = await this.pineconeService.search({

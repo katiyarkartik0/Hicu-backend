@@ -2,14 +2,10 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  OnModuleInit,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InstagramConfig, InstagramConversation } from './instagram.types';
-import { WEBHOOK_PROVIDERS } from 'src/webhook/types/webhook.types';
+import { InstagramConversation } from './instagram.types';
 import { CreateCommentDto } from './dto/webhook.dto';
 import { ReplyModel } from './instagram.schema';
-import { registeredActions } from 'src/shared/prompts/prompts';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -427,52 +423,6 @@ export class InstagramService {
   //     throw error;
   //   }
   // }
-
-  private getActionCb(actiontype) {
-    if (actiontype === 'extractLeads') {
-      return registeredActions.extractLeads;
-    }
-    throw new Error('this type of action does not exist');
-  }
-
-  async getPrompt({
-    action,
-    conversationHistory,
-    trigger,
-    commentText,
-    dmText,
-  }: GetPromptInput) {
-    const {
-      type: actiontype,
-      information: extractInformation,
-      extra: additionalInformation,
-    } = action;
-    const actionCb = this.getActionCb(actiontype);
-    if (commentText) {
-      const { COMMENTS } = INSTAGRAM_EVENTS;
-      const prompt = actionCb({
-        eventType: COMMENTS,
-        conversationHistory,
-        trigger,
-        latestConversation: commentText,
-        extractInformation,
-        additionalInformation,
-      });
-      return prompt;
-    } else if (dmText) {
-      const { DM_RECEIVED } = INSTAGRAM_EVENTS;
-      const prompt = actionCb({
-        eventType: DM_RECEIVED,
-        conversationHistory,
-        trigger,
-        latestConversation: dmText,
-        extractInformation,
-        additionalInformation,
-      });
-      return prompt;
-    }
-    throw new Error('Unidentified event cannot generate prompt');
-  }
 
   private sanitizeCommentPayload(payload: any) {
     const commentId = payload.entry[0].changes[0].value.id;

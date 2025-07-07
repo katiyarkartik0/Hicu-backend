@@ -1,19 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { CommentGraphService } from './comment-graph.service';
 import { InstagramUtilsService } from '../instagram-utils.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import type { LeadsAsked } from 'src/automations/automations.types';
 import { LeadsService } from 'src/leads/leads.service';
-import type {
-  CommentLlmGraphState,
-  ConversationHistory,
-  Prospect,
-} from './comments.types';
+
+import type { CommentLlmGraphState } from './comments.types';
 
 @Injectable()
 export class CommentsService {
+  private readonly logger = new Logger(CommentsService.name);
+
   constructor(
     private readonly instagramService: InstagramService,
     private readonly commentGraphService: CommentGraphService,
@@ -23,97 +22,131 @@ export class CommentsService {
     private readonly leadsService: LeadsService,
   ) {}
 
-  private async getProspect({ commenterId, accountId }): Promise<Prospect> {
-    const prospect: Prospect = (await this.prismaService.prospect.findFirst({
-      where: {
-        userId: commenterId,
-        accountId,
-      },
-    })) || {
-      userId: commenterId,
-      details: [],
-      lastLeadsGenerationAttempt: 0,
-      totalLeadsGenerationAttempts: 0,
-    };
+  private async getProspect({
+    commenterId,
+    accountId,
+  }): Promise<CommentLlmGraphState['prospect']> {
+    try {
+      const prospect = await this.prismaService.prospect.findFirst({
+        where: { userId: commenterId, accountId },
+      });
 
-    return prospect;
+      if (prospect) return prospect;
+
+      this.logger.debug(
+        `Prospect not found. Returning default for ${commenterId}`,
+      );
+      return {
+        userId: commenterId,
+        details: [],
+        lastLeadsGenerationAttempt: 0,
+        totalLeadsGenerationAttempts: 0,
+      };
+    } catch (err) {
+      this.logger.error(`Failed to fetch prospect: ${err.message}`, err.stack);
+      throw err;
+    }
   }
 
   private getSanitizedHistory({
     conversationHistory,
     commenterId,
     mediaOwnerId,
-  }): ConversationHistory {
-    const sanitizedHistory = conversationHistory
-      ? this.instagramUtilsService.sanitizeHistory(
-          conversationHistory.messages.data,
-          commenterId,
-          mediaOwnerId,
-        )
-      : { prospect: [], account: [] };
+  }): CommentLlmGraphState['conversationHistory'] {
+    try {
+      if (!conversationHistory) {
+        this.logger.debug('No conversation history found.');
+        return { prospect: [], account: [] };
+      }
 
-    return sanitizedHistory;
+      return this.instagramUtilsService.sanitizeHistory(
+        conversationHistory.messages.data,
+        commenterId,
+        mediaOwnerId,
+      );
+    } catch (err) {
+      this.logger.error('Failed to sanitize conversation history', err.stack);
+      return { prospect: [], account: [] }; // Fallback
+    }
   }
 
-  private async getAskedLeads(accountId: number): Promise<LeadsAsked> {
-    const leadsAsked: LeadsAsked = (await this.leadsService.findByAccount(
-      accountId,
-    )) || {
-      requirements: [],
-      maxGenerationAttemptsPerProspect: 0,
-      minGapBetweenPerGenerationAttempt: 0,
-    };
+  private async getAskedLeads(
+    accountId: number,
+  ): Promise<CommentLlmGraphState['leadsAsked']> {
+    try {
+      const leadsAsked = await this.leadsService.findByAccount(accountId);
 
-    return leadsAsked;
+      if (leadsAsked) return leadsAsked;
+
+      this.logger.debug(`No leadsAsked found for account ${accountId}`);
+      return {
+        requirements: [],
+        maxGenerationAttemptsPerProspect: 0,
+        minGapBetweenPerGenerationAttempt: 0,
+      };
+    } catch (err) {
+      this.logger.error(
+        `Failed to fetch leadsAsked: ${err.message}`,
+        err.stack,
+      );
+      throw err;
+    }
   }
 
   async handleComment(webhookPayload: any, accountId: number) {
-    const payload =
-      this.instagramUtilsService.sanitizeCommentPayload(webhookPayload);
+    try {
+      const payload =
+        this.instagramUtilsService.sanitizeCommentPayload(webhookPayload);
 
-    const {
-      comment: { commenterId },
-      media: { mediaOwnerId, mediaId },
-    } = payload;
+      const {
+        comment: { commenterId },
+        media: { mediaOwnerId, mediaId },
+      } = payload;
 
-    const igCommentAutomation =
-      await this.automationService.findByIgCommentAutomationByMedia(mediaId);
-    if (!igCommentAutomation || !igCommentAutomation.commentAutomationId) {
-      return;
-    }
-
-    const prospect: Prospect = await this.getProspect({
-      commenterId,
-      accountId,
-    });
-
-    const conversationHistory =
-      await this.instagramService.getConversationHistory(
-        commenterId,
-        accountId,
+      this.logger.log(
+        `Handling comment from ${commenterId} on media ${mediaId}`,
       );
 
-    const sanitizedHistory = this.getSanitizedHistory({
-      commenterId,
-      mediaOwnerId,
-      conversationHistory,
-    });
+      const igCommentAutomation =
+        await this.automationService.findByIgCommentAutomationByMedia(mediaId);
 
-    const shopifyServices = []; // Optional, can move to constants
+      if (!igCommentAutomation?.commentAutomationId) {
+        return;
+      }
 
-    const leadsAsked = await this.getAskedLeads(accountId);
+      const prospect = await this.getProspect({ commenterId, accountId });
 
-    const graphState: CommentLlmGraphState = {
-      history: sanitizedHistory,
-      accountIg: { userId: mediaOwnerId },
-      prospect,
-      accountId,
-      commentPayload: payload,
-      services: shopifyServices,
-      igCommentAutomation,
-      leadsAsked,
-    };
+      const conversationHistory =
+        await this.instagramService.getConversationHistory(
+          commenterId,
+          accountId,
+        );
 
-    await this.commentGraphService.runGraph(graphState);
+      const sanitizedHistory = this.getSanitizedHistory({
+        commenterId,
+        mediaOwnerId,
+        conversationHistory,
+      });
+
+      const shopifyServices = []; // Optional, can move to constants
+      const leadsAsked = await this.getAskedLeads(accountId);
+
+      const graphState: CommentLlmGraphState = {
+        conversationHistory: sanitizedHistory,
+        igAccount: { userId: mediaOwnerId },
+        prospect,
+        accountId,
+        commentPayload: payload,
+        services: shopifyServices,
+        igCommentAutomation,
+        leadsAsked,
+      };
+
+      this.logger.log(`Running graph for commenter ${commenterId}`);
+      await this.commentGraphService.runGraph(graphState);
+    } catch (err) {
+      this.logger.error('Error handling comment webhook', err.stack);
+      throw err;
+    }
   }
 }
