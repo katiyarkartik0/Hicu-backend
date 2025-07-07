@@ -8,15 +8,16 @@ import {
   Delete,
 } from '@nestjs/common';
 import { LeadsService } from './leads.service';
-import { Leads } from './dto/create-lead.dto';
+import { Leads as LeadsAsked } from './dto/create-lead.dto';
 
 @Controller('leads')
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
   @Post()
-  create(@Body() createLeadDto: Leads) {
-    return this.leadsService.create(createLeadDto);
+  async create(@Body() createLeadDto: LeadsAsked) {
+    const leadsAsked = await this.leadsService.create(createLeadDto);
+    return { data: leadsAsked };
   }
 
   @Get()

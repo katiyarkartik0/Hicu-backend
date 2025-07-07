@@ -20,6 +20,7 @@ import { ShopifyModule } from './shopify/shopify.module';
 import { McpModule } from './mcp/mcp.module';
 import { PineconeModule } from './pinecone/pinecone.module';
 import { LeadsModule } from './leads/leads.module';
+import { ProspectsModule } from './prospects/prospects.module';
 
 @Module({
   imports: [
@@ -45,7 +46,8 @@ import { LeadsModule } from './leads/leads.module';
     ShopifyModule,
     McpModule,
     PineconeModule,
-    LeadsModule
+    LeadsModule,
+    ProspectsModule
   ],
   controllers: [AppController],
   providers: [AppService],

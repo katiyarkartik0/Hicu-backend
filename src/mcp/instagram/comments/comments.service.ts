@@ -4,8 +4,8 @@ import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { CommentGraphService } from './comment-graph.service';
 import { InstagramUtilsService } from '../instagram-utils.service';
 import { AutomationsService } from 'src/automations/automations.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { LeadsService } from 'src/leads/leads.service';
+import { ProspectsService } from 'src/prospects/prospects.service';
 
 import type { CommentLlmGraphState } from './comments.types';
 
@@ -18,8 +18,8 @@ export class CommentsService {
     private readonly commentGraphService: CommentGraphService,
     private readonly instagramUtilsService: InstagramUtilsService,
     private readonly automationService: AutomationsService,
-    private readonly prismaService: PrismaService,
     private readonly leadsService: LeadsService,
+    private readonly prospectsService: ProspectsService,
   ) {}
 
   private async getProspect({
@@ -27,8 +27,9 @@ export class CommentsService {
     accountId,
   }): Promise<CommentLlmGraphState['prospect']> {
     try {
-      const prospect = await this.prismaService.prospect.findFirst({
-        where: { userId: commenterId, accountId },
+      const prospect = await this.prospectsService.findByAccountIdUserId({
+        accountId,
+        userId: commenterId,
       });
 
       if (prospect) return prospect;

@@ -1,6 +1,6 @@
 import type { IgCommentAutomation } from 'src/automations/automations.types';
 import { Leads as LeadsAsked } from 'src/leads/dto/create-lead.dto';
-import { Prospect } from 'src/prospect/prospect.types';
+import { Prospect } from 'src/prospects/dto/create-prospect.dto';
 import { IgAccount } from 'src/webhook/types/me.types';
 
 export type ProspectIG = {
@@ -44,7 +44,7 @@ export interface CommentLlmGraphState {
   commentPayload: SanitizedCommentPayload;
   igAccount: IgAccount;
   prospect: GraphStateProspect;
-  leadsAsked: LeadsAsked;
+  leadsAsked: Omit<LeadsAsked, 'accountId'>;
   accountId: number;
   error?: string;
   igCommentAutomation: IgCommentAutomation;

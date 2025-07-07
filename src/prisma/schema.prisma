@@ -79,22 +79,26 @@ model IgDmAutomation {
 model Leads {
   id                                Int     @id @default(autoincrement())
   accountId                         Int     @unique
-  requirements                      Json
+  requirements                      String[]
   maxGenerationAttemptsPerProspect  Int
   minGapBetweenPerGenerationAttempt Int
   account                           Account @relation(fields: [accountId], references: [id])
 }
 
 model Prospect {
-  id                           Int     @id @default(autoincrement())
-  userId                       String
-  username                     String
-  accountId                    Int
-  details                      Json
-  lastLeadsGenerationAttempt   Int
+  id                            Int     @id @default(autoincrement())
+  userId                        String
+  username                      String
+  accountId                     Int
+  details                       Json
+  lastLeadsGenerationAttempt    Int
   totalLeadsGenerationAttempts Int
+
   account                      Account @relation(fields: [accountId], references: [id])
+
+  @@unique([accountId, userId]) // ✅ Composite unique constraint
 }
+
 
 //this has been created so that this could be sent to FE to render a page to display all the featured integrations, config to render the form
 model Integration {
