@@ -5,9 +5,10 @@ import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
-import { GeminiPromptService } from './gemini-prompt.service';
+import { GeminiPromptService } from './ai.service';
 
 import type { CommentLlmGraphState } from './comments.types';
+import { ProspectsService } from 'src/prospects/prospects.service';
 
 @Injectable()
 export class CommentGraphService {
@@ -19,6 +20,7 @@ export class CommentGraphService {
     private pineconeService: PineconeService,
     private readonly automationService: AutomationsService,
     private readonly geminiService: GeminiService,
+    private readonly prospectService: ProspectsService
   ) {
     // automationService and geminiService are imported for this binding do not remove
   }
@@ -120,12 +122,11 @@ export class CommentGraphService {
 
       this.logger.log(response, '[feedback responsesss]');
 
-      // await this.instagramService.respondToComment(
-      //   commentId,
-      //   response,
-      //   accountId,
-      // );
-      console.log('respondToFeedbackInComments completed, moving to leadsNode');
+      await this.instagramService.respondToComment(
+        commentId,
+        response,
+        accountId,
+      );
 
       // this.logger.log('respondToFeedbackInComments completed, moving to leadsNode');
       return state;
@@ -197,6 +198,8 @@ export class CommentGraphService {
         response,
         accountId,
       );
+
+      // await this.pr
 
       this.logger.log(`Sent DM for commentId: ${commentId}`);
 

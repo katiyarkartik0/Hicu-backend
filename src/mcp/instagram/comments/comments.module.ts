@@ -10,7 +10,7 @@ import { ProspectsModule } from 'src/prospects/prospects.module';
 
 import { CommentGraphService } from './comment-graph.service';
 import { InstagramUtilsService } from '../instagram-utils.service';
-import { GeminiPromptService } from './gemini-prompt.service';
+import { GeminiPromptService } from './ai.service';
 import { CommentsService } from './comments.service';
 
 @Module({

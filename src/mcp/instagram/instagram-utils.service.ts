@@ -201,15 +201,16 @@ export class InstagramUtilsService {
   }
 
   sanitizeDmPayload(payload: any): SanitizedDmPayload {
+  
     try {
-      const value = payload?.value;
-
-      const senderId = value?.sender?.id;
-      const recipientId = value?.recipient?.id;
-      const messageId = value?.message?.mid;
-      const messageText = value?.message?.text;
-      const timestamp = value?.timestamp;
-
+      const messagingEvent = payload?.entry?.[0]?.messaging?.[0];
+  
+      const senderId = messagingEvent?.sender?.id;
+      const recipientId = messagingEvent?.recipient?.id;
+      const messageId = messagingEvent?.message?.mid;
+      const messageText = messagingEvent?.message?.text;
+      const timestamp = messagingEvent?.timestamp;
+  
       if (
         !senderId ||
         !recipientId ||
@@ -220,7 +221,7 @@ export class InstagramUtilsService {
         this.logger.error('Missing required fields in DM payload');
         throw new Error('Invalid DM payload');
       }
-
+  
       return {
         dm: {
           senderId,
@@ -235,6 +236,7 @@ export class InstagramUtilsService {
       throw err;
     }
   }
+  
 }
 
 interface SelectServiceResponse {

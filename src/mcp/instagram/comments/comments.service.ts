@@ -53,6 +53,10 @@ export class CommentsService {
     conversationHistory,
     commenterId,
     mediaOwnerId,
+  }: {
+    conversationHistory: any;
+    commenterId: string;
+    mediaOwnerId: string;
   }): CommentLlmGraphState['conversationHistory'] {
     try {
       if (!conversationHistory) {
@@ -104,10 +108,6 @@ export class CommentsService {
         media: { mediaOwnerId, mediaId },
       } = payload;
 
-      this.logger.log(
-        `Handling comment from ${commenterId} on media ${mediaId}`,
-      );
-
       const igCommentAutomation =
         await this.automationService.findByIgCommentAutomationByMedia(mediaId);
 
@@ -117,20 +117,13 @@ export class CommentsService {
 
       const prospect = await this.getProspect({ commenterId, accountId });
 
-      const conversationHistory =
-        await this.instagramService.getConversationHistory(
-          commenterId,
-          accountId,
-        );
-
-      const sanitizedHistory = this.getSanitizedHistory({
-        commenterId,
-        mediaOwnerId,
-        conversationHistory,
-      });
-
-      const shopifyServices = []; // Optional, can move to constants
       const leadsAsked = await this.getAskedLeads(accountId);
+
+      const sanitizedHistory = await this.sanitizedConversationHistory({
+        commenterId,
+        accountId,
+        mediaOwnerId,
+      });
 
       const graphState: CommentLlmGraphState = {
         conversationHistory: sanitizedHistory,
@@ -138,7 +131,7 @@ export class CommentsService {
         prospect,
         accountId,
         commentPayload: payload,
-        services: shopifyServices,
+        services: [],
         igCommentAutomation,
         leadsAsked,
       };
@@ -149,5 +142,29 @@ export class CommentsService {
       this.logger.error('Error handling comment webhook', err.stack);
       throw err;
     }
+  }
+
+  private async sanitizedConversationHistory({
+    commenterId,
+    accountId,
+    mediaOwnerId,
+  }: {
+    commenterId: string;
+    accountId: number;
+    mediaOwnerId: string;
+  }) {
+    const conversationHistory =
+      await this.instagramService.getConversationHistory(
+        commenterId,
+        accountId,
+      );
+
+    const sanitizedHistory = this.getSanitizedHistory({
+      commenterId,
+      mediaOwnerId,
+      conversationHistory,
+    });
+
+    return sanitizedHistory;
   }
 }

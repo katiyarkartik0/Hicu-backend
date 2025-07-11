@@ -20,6 +20,12 @@ export class LeadsController {
     return { data: leadsAsked };
   }
 
+  @Get(':accountId')
+  async findByAccount(@Param('accountId') accountId: number) {
+    const leads = await this.leadsService.findByAccount(accountId);
+    return { data: leads };
+  }
+
   @Get()
   findAll() {
     return this.leadsService.findAll();
@@ -39,4 +45,6 @@ export class LeadsController {
   remove(@Param('id') id: string) {
     return this.leadsService.remove(+id);
   }
+
+
 }

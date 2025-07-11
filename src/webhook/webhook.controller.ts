@@ -19,7 +19,7 @@ export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
     private readonly instagramService: InstagramService,
-    private readonly mcqService:McpService
+    private readonly mcpService: McpService,
   ) {}
 
   private getInstagramEventType(body: any): string {
@@ -97,12 +97,14 @@ export class WebhookController {
         payload,
         accountId,
       );
+      console.log(eventType);
+
       switch (eventType) {
         case DM_RECEIVED:
-          // await this.instagramService.handleDM(payload, accountId);
+          await this.mcpService.handleIgWebhook(payload, accountId);
           break;
         case COMMENTS:
-          await this.mcqService.handleIgWebhook(payload, accountId);
+          await this.mcpService.handleIgWebhook(payload, accountId);
           break;
       }
     } catch (error) {

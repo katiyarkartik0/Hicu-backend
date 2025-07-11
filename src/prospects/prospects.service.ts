@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prospect } from './dto/create-prospect.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProspectsService {
@@ -9,20 +10,51 @@ export class ProspectsService {
     return this.prismaService.prospect.create({ data: createProspectDto });
   }
 
-  findAll() {
-    return `This action returns all prospects`;
+  findAll(accountId: number) {
+    return this.prismaService.prospect.findMany({ where: { accountId } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} prospect`;
-  }
-
-  update(id: number, updateProspectDto) {
-    return `This action updates a #${id} prospect`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} prospect`;
+  async upsertPersonalDetails({
+    accountId,
+    userId,
+    details,
+    username,
+  }: {
+    accountId: number;
+    userId: string;
+    username: string;
+    details: Record<string, any>;
+  }) {
+    // const prospect = await this.prismaService.prospect.findUnique({
+    //   where: {
+    //     accountId_userId: {
+    //       accountId,
+    //       userId,
+    //     },
+    //   },
+    // });
+    // if (!prospect) {
+    //   return await this.prismaService.prospect.create({
+    //     data: {
+    //       accountId,
+    //       userId,
+    //       username,
+    //       details: details || {},
+    //       lastLeadsGenerationAttempt: 0,
+    //       totalLeadsGenerationAttempts: 0,
+    //     },
+    //   });
+    // } else {
+    //   return await this.prismaService.prospect.update({
+    //     where: {
+    //       accountId_userId: {
+    //         accountId,
+    //         userId,
+    //       },
+    //     },
+    //     data: { details: updatedDetails },
+    //   });
+    // }
   }
 
   async findByAccountIdUserId({

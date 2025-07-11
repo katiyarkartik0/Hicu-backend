@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateAutomationDto } from './dto/create-automation.dto';
 import { UpdateAutomationDto } from './dto/update-automation.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import type {
-  IgCommentAutomation,
-  IgDmAutomation,
-} from './automations.types';
+import type { IgCommentAutomation, IgDmAutomation } from './automations.types';
 
 @Injectable()
 export class AutomationsService {
@@ -22,10 +19,18 @@ export class AutomationsService {
   }
 
   findByIgCommentAutomationByMedia(mediaId: string) {
-    return this.prismaService.igCommentAutomation.findUnique({ where: { mediaId } });
+    return this.prismaService.igCommentAutomation.findUnique({
+      where: { mediaId },
+    });
   }
 
   createIgDmAutomation(data: Omit<IgDmAutomation, 'id'>) {
     return this.prismaService.igDmAutomation.create({ data });
+  }
+
+  findByIgDmAutomationByAccount(accountId: number) {
+    return this.prismaService.igDmAutomation.findUnique({
+      where: { accountId },
+    });
   }
 }

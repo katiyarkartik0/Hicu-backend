@@ -51,6 +51,6 @@ export interface CommentLlmGraphState {
 }
 
 type GraphStateProspect = Omit<Prospect, 'username' | 'accountId'> & {
-  username?: string;
+  username?: string | null;
   accountId?: number;
 };

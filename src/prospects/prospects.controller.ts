@@ -20,23 +20,9 @@ export class ProspectsController {
     return { data: prospect };
   }
 
-  @Get()
-  findAll() {
-    return this.prospectsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.prospectsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProspectDto) {
-    return this.prospectsService.update(+id, updateProspectDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.prospectsService.remove(+id);
+  @Get(':accountId')
+  findAll(@Param('accountId') accountId: number) {
+    const prospects = this.prospectsService.findAll(accountId);
+    return { data: prospects };
   }
 }

@@ -310,18 +310,24 @@ export class InstagramService {
     return response.json();
   }
 
-  async sendDmForExistingConversation(
-    recipientId: string,
-    message: string,
-    accountId: number,
-  ) {
+  async sendDmForExistingConversation({
+    recipientId,
+    message,
+    accountId,
+  }: {
+    recipientId: string;
+    message: string;
+    accountId: number;
+  }) {
     const accessToken = await this.getInstagramAccessToken({ accountId });
     const { id } = await this.getMyDetails({ accountId });
 
     const url = `https://graph.instagram.com/${id}/messages`;
 
-    console.log(message, '[sendDmForExistingConversation]: message to send in dm');
-
+    console.log(
+      message,
+      '[sendDmForExistingConversation]: message to send in dm',
+    );
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -633,3 +639,5 @@ export class InstagramService {
     }
   }
 }
+
+//recipientId 17841475701228846

@@ -7,7 +7,9 @@ import { Prisma } from '@prisma/client';
 export class LeadsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createLeadDto: LeadsAsked) {
+  async create(
+    createLeadDto: LeadsAsked,
+  ): Promise<LeadsAsked & { id: number }> {
     return await this.prismaService.leads.create({ data: createLeadDto });
   }
 
@@ -22,7 +24,9 @@ export class LeadsService {
   }
 
   async update(id: number, updateLeadDto: Partial<LeadsAsked>) {
-    const existing = await this.prismaService.leads.findUnique({ where: { id } });
+    const existing = await this.prismaService.leads.findUnique({
+      where: { id },
+    });
     if (!existing) throw new NotFoundException(`Lead with id ${id} not found`);
 
     return await this.prismaService.leads.update({

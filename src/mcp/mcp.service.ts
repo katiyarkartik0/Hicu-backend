@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { CommentsService } from './instagram/comments/comments.service';
 import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
+import { DmsService } from './instagram/dms/dms.service';
 
 @Injectable()
 export class McpService {
   constructor(
     private readonly instagramService: InstagramService,
     private readonly igCommentsService: CommentsService,
+    private readonly igDmService:DmsService
   ) {}
 
   async handleIgWebhook(payload: any, accountId: number) {
@@ -19,7 +21,7 @@ export class McpService {
       );
       switch (eventType) {
         case DM_RECEIVED:
-        //   await this.instagramService.handleDM(payload, accountId);
+          await this.igDmService.handleDm(payload, accountId);
           break;
         case COMMENTS:
           await this.igCommentsService.handleComment(payload, accountId);
