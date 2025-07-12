@@ -3,7 +3,7 @@ import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { CommentLlmGraphState } from './comments.types';
 
 @Injectable()
-export class GeminiPromptService {
+export class AiService {
   constructor(private readonly geminiService: GeminiService) {}
 
   async generateFeedbackResponse(

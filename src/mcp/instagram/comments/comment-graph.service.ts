@@ -5,7 +5,7 @@ import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
-import { GeminiPromptService } from './ai.service';
+import { AiService } from './ai.service';
 
 import type { CommentLlmGraphState } from './comments.types';
 import { ProspectsService } from 'src/prospects/prospects.service';
@@ -15,7 +15,7 @@ export class CommentGraphService {
   private readonly logger = new Logger(CommentGraphService.name);
 
   constructor(
-    private geminiPromptService: GeminiPromptService,
+    private aiService: AiService,
     private instagramService: InstagramService,
     private pineconeService: PineconeService,
     private readonly automationService: AutomationsService,
@@ -86,7 +86,7 @@ export class CommentGraphService {
         .addNode('product_enquiry', this.handleProductEnquiry.bind(this))
         .addConditionalEdges(
           '__start__',
-          this.geminiPromptService.detectIntent.bind(this),
+          this.aiService.detectIntent.bind(this),
         )
         .addEdge('feedback', 'leadsNode')
         .addEdge('leadsNode', '__end__')
@@ -115,7 +115,7 @@ export class CommentGraphService {
       state.commentPayload.comment;
 
     try {
-      const response = await this.geminiPromptService.generateFeedbackResponse(
+      const response = await this.aiService.generateFeedbackResponse(
         feedbackText,
         accountId,
       );
@@ -181,7 +181,7 @@ export class CommentGraphService {
       }
 
       const response =
-        await this.geminiPromptService.generateLeadsExtractionText(
+        await this.aiService.generateLeadsExtractionText(
           details,
           requirements,
           commentText,
@@ -287,7 +287,7 @@ export class CommentGraphService {
         query: commentPayload.comment.commentText,
       });
 
-      const response = await this.geminiPromptService.makeHumanResponse(
+      const response = await this.aiService.makeHumanResponse(
         result,
         accountId,
       );
