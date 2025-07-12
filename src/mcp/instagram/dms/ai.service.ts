@@ -135,9 +135,6 @@ Text:
     detailsCollected: DmLlmGraphState['prospect']['details'];
     accountId: number;
   }): Promise<any> {
-    const missingDetails = detailsRequired.filter(
-      (detail) => !(detail in detailsCollected),
-    );
     const prompt = `
     You are an intelligent extraction engine.
     
@@ -151,23 +148,16 @@ Text:
     1. All the already collected details.
     2. Any additional details found in the message that were not already collected.
     
-    Do NOT guess missing information. Only include a field if it is clearly stated or implied in the message.
-    
-    Example format:
-    {
-      "email": "example@email.com",
-      "fullname": "John Doe"
-    }`;
+    Do NOT guess missing information. Only include a field if it is clearly stated or implied in the message.`;
 
     const responseSchema = this.buildResponseSchema(detailsRequired);
-
     try {
       const result = await this.geminiService.queryGeminiForObject(
         prompt,
         accountId,
         responseSchema,
       );
-      return typeof result === 'string' ? result : '';
+      return result;
     } catch (error) {
       console.error('Error generating feedback response:', error);
       return 'Thank you for your feedback!';

@@ -22,39 +22,51 @@ export class ProspectsService {
   }: {
     accountId: number;
     userId: string;
-    username: string;
+    username?: string;
     details: Record<string, any>;
   }) {
-    // const prospect = await this.prismaService.prospect.findUnique({
-    //   where: {
-    //     accountId_userId: {
-    //       accountId,
-    //       userId,
-    //     },
-    //   },
-    // });
-    // if (!prospect) {
-    //   return await this.prismaService.prospect.create({
-    //     data: {
-    //       accountId,
-    //       userId,
-    //       username,
-    //       details: details || {},
-    //       lastLeadsGenerationAttempt: 0,
-    //       totalLeadsGenerationAttempts: 0,
-    //     },
-    //   });
-    // } else {
-    //   return await this.prismaService.prospect.update({
-    //     where: {
-    //       accountId_userId: {
-    //         accountId,
-    //         userId,
-    //       },
-    //     },
-    //     data: { details: updatedDetails },
-    //   });
-    // }
+    const prospect = await this.prismaService.prospect.findUnique({
+      where: {
+        accountId_userId: {
+          accountId,
+          userId,
+        },
+      },
+    });
+    if (!prospect) {
+      return await this.prismaService.prospect.create({
+        data: {
+          accountId,
+          userId,
+          username,
+          details: details || {},
+          lastLeadsGenerationAttempt: 0,
+          totalLeadsGenerationAttempts: 0,
+        },
+      });
+    } else {
+      return await this.prismaService.prospect.update({
+        where: {
+          accountId_userId: {
+            accountId,
+            userId,
+          },
+        },
+        data: { details },
+      });
+    }
+  }
+
+  async update({ accountId, userId, data }) {
+    return await this.prismaService.prospect.update({
+      where: {
+        accountId_userId: {
+          accountId,
+          userId,
+        },
+      },
+      data,
+    });
   }
 
   async findByAccountIdUserId({

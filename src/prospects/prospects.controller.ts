@@ -21,8 +21,8 @@ export class ProspectsController {
   }
 
   @Get(':accountId')
-  findAll(@Param('accountId') accountId: number) {
-    const prospects = this.prospectsService.findAll(accountId);
+  async findAll(@Param('accountId') accountId: number) {
+    const prospects = await this.prospectsService.findAll(accountId);
     return { data: prospects };
   }
 }

@@ -37,14 +37,16 @@ export class LeadsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLeadDto) {
-    return this.leadsService.update(+id, updateLeadDto);
+  async update(
+    @Param('id') id: number,
+    @Body() updateLeadDto: Partial<LeadsAsked>,
+  ) {
+    const data = await this.leadsService.update(id, updateLeadDto);
+    return { data };
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.leadsService.remove(+id);
   }
-
-
 }

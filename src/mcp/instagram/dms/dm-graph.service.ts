@@ -174,7 +174,6 @@ export class DmGraphService {
       accountId: state.accountId,
       userId: state.prospect.userId,
       details: updatedDetails,
-      username: state.dmPayload.dm.messageId,
     });
   }
 }

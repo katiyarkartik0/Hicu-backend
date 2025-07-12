@@ -20,9 +20,9 @@ export class CommentGraphService {
     private pineconeService: PineconeService,
     private readonly automationService: AutomationsService,
     private readonly geminiService: GeminiService,
-    private readonly prospectService: ProspectsService
+    private readonly prospectsService: ProspectsService,
   ) {
-    // automationService and geminiService are imported for this binding do not remove
+    // automationService and eminiService are imported for this binding do not remove
   }
 
   getGraphChannels(): StateGraphArgs<CommentLlmGraphState>['channels'] {
@@ -130,7 +130,6 @@ export class CommentGraphService {
 
       // this.logger.log('respondToFeedbackInComments completed, moving to leadsNode');
       return state;
-
     } catch (error) {
       this.logger.error(
         `Failed to respond to feedback in comment: ${commentId}`,
@@ -146,7 +145,7 @@ export class CommentGraphService {
 
   async generateLeadsInDm(state: CommentLlmGraphState) {
     try {
-      const now = Date.now();
+      const now = Math.floor(Date.now() / (1000 * 60)); //in minutes
 
       const {
         leadsAsked: {
@@ -158,9 +157,10 @@ export class CommentGraphService {
           details,
           lastLeadsGenerationAttempt,
           totalLeadsGenerationAttempts,
+          userId,
         },
         commentPayload: {
-          comment: { commentText, commentId },
+          comment: { commentText, commentId, commenterUsername },
           media: { mediaOwnerId },
         },
         accountId,
@@ -199,8 +199,20 @@ export class CommentGraphService {
         accountId,
       );
 
-      // await this.pr
-
+      // await this.prospectsService.update({
+      //   accountId: state.accountId,
+      //   userId: state.prospect.userId,
+      //   data: {
+      //     totalLeadsGenerationAttempts: { increment: 1 },
+      //     lastLeadsGenerationAttempt: now,
+      //   },
+      // });
+      await this.upsertProspect({
+        accountId,
+        userId,
+        username: commenterUsername,
+        details,
+      });
       this.logger.log(`Sent DM for commentId: ${commentId}`);
 
       return { ...state, response }; // Include response in state for tracking
@@ -210,6 +222,60 @@ export class CommentGraphService {
         error.stack,
       );
       return { ...state, response: '' }; // Return safe fallback state
+    }
+  }
+
+  private async upsertProspect({
+    accountId,
+    userId,
+    username,
+    details,
+  }: {
+    accountId: number;
+    userId: string;
+    username?: string;
+    details?: any | undefined;
+  }) {
+    this.logger.log(
+      `Sent DM for commentId: ${{
+        accountId,
+        userId,
+        username,
+        details,
+      }}
+      {
+        accountId,
+        userId,
+        username,
+        details,
+      }
+      `,
+    );
+
+    const now = Math.floor(Date.now() / (1000 * 60)); //in minutes
+
+    const prospect = await this.prospectsService.findByAccountIdUserId({
+      userId,
+      accountId,
+    });
+    if (!prospect) {
+      return await this.prospectsService.create({
+        accountId,
+        userId,
+        username,
+        details: details || {},
+        lastLeadsGenerationAttempt: now,
+        totalLeadsGenerationAttempts: 1,
+      });
+    } else {
+      return await this.prospectsService.update({
+        accountId,
+        userId,
+        data: {
+          totalLeadsGenerationAttempts: { increment: 1 },
+          lastLeadsGenerationAttempt: now,
+        },
+      });
     }
   }
   async handleProductEnquiry(state: CommentLlmGraphState) {
