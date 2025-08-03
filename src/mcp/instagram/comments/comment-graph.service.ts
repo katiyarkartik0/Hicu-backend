@@ -199,14 +199,6 @@ export class CommentGraphService {
         accountId,
       );
 
-      // await this.prospectsService.update({
-      //   accountId: state.accountId,
-      //   userId: state.prospect.userId,
-      //   data: {
-      //     totalLeadsGenerationAttempts: { increment: 1 },
-      //     lastLeadsGenerationAttempt: now,
-      //   },
-      // });
       await this.upsertProspect({
         accountId,
         userId,
@@ -215,7 +207,7 @@ export class CommentGraphService {
       });
       this.logger.log(`Sent DM for commentId: ${commentId}`);
 
-      return { ...state, response }; // Include response in state for tracking
+      return { ...state, response };
     } catch (error) {
       this.logger.error(
         `Failed to generate or send leads in DM: ${error.message}`,
