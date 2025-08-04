@@ -118,6 +118,7 @@ export class InstagramService {
       });
     const accessToken =
       configurations[CONFIGURATIONS_VARIABLES.INSTAGRAM.ACCESS_TOKEN];
+      console.log(configurations,"configurations[][][][][][][[]][][][]")
     return accessToken;
   }
 
