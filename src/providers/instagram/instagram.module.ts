@@ -1,29 +1,27 @@
 import { Module } from '@nestjs/common';
-import { InstagramService } from './instagram.service';
-import { ConfigModule } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
-import { GeminiModule } from 'src/ai/providers/gemini/gemini.module';
-import { AutomationsModule } from 'src/automations/automations.module';
-import { PrismaModule } from 'src/prisma/prisma.module';
+
 import { InstagramController } from './instagram.controller';
+
+import { InstagramService } from './instagram.service';
+import { CommentService } from './serviceBundle/comment.service';
+import { DmService } from './serviceBundle/dm.service';
+import { PostService } from './serviceBundle/post.service';
+import { PrivateInfoService } from './serviceBundle/privateInfo.service';
+
 import { ConfigurationsModule } from 'src/configurations/configurations.module';
 
 @Module({
   imports: [
-    ConfigModule.forFeature(() => ({
-      instagram: {
-        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
-        apiVersion: process.env.INSTAGRAM_API_VERSION,
-      },
-    })),
-    HttpModule,
-    GeminiModule,
-    AutomationsModule,
-    PrismaModule,
     ConfigurationsModule,
   ],
   controllers: [InstagramController],
-  providers: [InstagramService],
+  providers: [
+    InstagramService,
+    CommentService,
+    DmService,
+    PostService,
+    PrivateInfoService,
+  ],
   exports: [InstagramService],
 })
 export class InstagramModule {}

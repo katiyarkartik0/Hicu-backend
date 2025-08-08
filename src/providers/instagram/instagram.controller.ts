@@ -9,7 +9,6 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { InstagramService } from './instagram.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 

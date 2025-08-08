@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { CreateConfigurationsDto } from './dto/create-configurations.dto';
 import { UpdateConfigurationsDto } from './dto/update-configurations.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -6,6 +10,8 @@ import { EncryptionService } from 'src/encryption/encryption.service';
 
 @Injectable()
 export class ConfigurationsService {
+  private readonly logger = new Logger(ConfigurationsService.name);
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly encryptionService: EncryptionService,
@@ -60,35 +66,45 @@ export class ConfigurationsService {
     accountId: number;
     integrationName?: string;
   }) {
-    let integration;
-    if (integrationId && accountId) {
-      integration =
-        (await this.prismaService.configurations.findFirst({
-          where: {
-            integrationId: integrationId,
-            accountId: accountId,
-          },
-        })) || {};
-    } else if (integrationName && accountId) {
-      integration =
-        (await this.prismaService.configurations.findFirst({
-          where: {
-            accountId: accountId,
-            integration: {
-              name: integrationName,
+    try {
+      let integration;
+      if (integrationId && accountId) {
+        integration =
+          (await this.prismaService.configurations.findFirst({
+            where: {
+              integrationId: integrationId,
+              accountId: accountId,
             },
-          },
-        })) || {};
-    }
+          })) || {};
+      } else if (integrationName && accountId) {
+        integration =
+          (await this.prismaService.configurations.findFirst({
+            where: {
+              accountId: accountId,
+              integration: {
+                name: integrationName,
+              },
+            },
+          })) || {};
+      }
 
-    let decryptedConfig = {};
-    Object.keys(integration.config).forEach((name) => {
-      decryptedConfig = {
-        ...decryptedConfig,
-        [name]: this.encryptionService.decrypt(integration.config[name]),
-      };
-    });
-    return { ...integration, config: decryptedConfig };
+      let decryptedConfig = {};
+      Object.keys(integration.config).forEach((name) => {
+        decryptedConfig = {
+          ...decryptedConfig,
+          [name]: this.encryptionService.decrypt(integration.config[name]),
+        };
+      });
+      return { ...integration, config: decryptedConfig };
+    } catch (error) {
+      this.logger.error(
+        `Error getting configuration for account ${accountId}` +
+          (integrationId ? `, integrationId: ${integrationId}` : '') +
+          (integrationName ? `, integrationName: ${integrationName}` : ''),
+        error.stack || error.message,
+      );
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async getConfigurationsForAccount({ accountId }: { accountId: number }) {
