@@ -3,10 +3,6 @@ import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
 
 import { AppModule } from './app.module';
-import { configureDynamoose } from './config/dynamoose.config';
-
-
-configureDynamoose();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule,{cors:true});

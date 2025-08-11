@@ -1,15 +1,13 @@
 import {
   Controller,
-  Post,
-  Req,
-  Res,
-  Headers,
   Get,
   Query,
   Param,
   UseGuards,
 } from '@nestjs/common';
+
 import { InstagramService } from './instagram.service';
+
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @UseGuards(AuthGuard)

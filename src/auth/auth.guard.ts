@@ -30,11 +30,11 @@ export class AuthGuard implements CanActivate {
         secret: this.JWT_SECRET,
       });
       request['user'] = payload;
+      return true;
     } catch(err) {
       console.log(err)
       throw new UnauthorizedException();
     }
-    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

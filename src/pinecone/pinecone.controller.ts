@@ -1,22 +1,19 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { PineconeService } from './pinecone.service';
-import { CreatePineconeDto } from './dto/create-pinecone.dto';
-import { UpdatePineconeDto } from './dto/update-pinecone.dto';
-import { Product, ShopifyService } from 'src/shopify/shopify.service';
-import { Document } from '@langchain/core/documents';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { Document } from '@langchain/core/documents';
 
+import { PineconeService } from './pinecone.service';
+import { Product, ShopifyService } from 'src/shopify/shopify.service';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+
+@UseGuards(AuthGuard)
 @Controller('pinecone')
 export class PineconeController {
   constructor(
     private readonly pineconeService: PineconeService,
     private readonly shopifyService: ShopifyService,
   ) {}
-
-  @Post('createPinecone')
-  create(createPineconeDto: CreatePineconeDto) {
-    // return this.pineconeService.create(createPineconeDto);
-  }
 
   @Get('upsert')
   async upsert(@Query('accountId') accountId: number) {
@@ -80,24 +77,4 @@ export class PineconeController {
     const res = await this.pineconeService.get();
     return res;
   }
-
-  // @MessagePattern('findAllPinecone')
-  // findAll() {
-  //   return this.pineconeService.findAll();
-  // }
-
-  // @MessagePattern('findOnePinecone')
-  // findOne(@Payload() id: number) {
-  //   return this.pineconeService.findOne(id);
-  // }
-
-  // @MessagePattern('updatePinecone')
-  // update(@Payload() updatePineconeDto: UpdatePineconeDto) {
-  //   return this.pineconeService.update(updatePineconeDto.id, updatePineconeDto);
-  // }
-
-  // @MessagePattern('removePinecone')
-  // remove(@Payload() id: number) {
-  //   return this.pineconeService.remove(id);
-  // }
 }

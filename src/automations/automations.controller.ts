@@ -1,8 +1,13 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
-import { AutomationsService } from './automations.service';
-import { IgCommentAutomation } from './automations.types';
-import { IgDmAutomation } from '@prisma/client';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 
+import { AutomationsService } from './automations.service';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+
+import type { IgDmAutomation } from '@prisma/client';
+import type { IgCommentAutomation } from './automations.types';
+
+@UseGuards(AuthGuard)
 @Controller('automations')
 export class AutomationsController {
   constructor(private readonly automationsService: AutomationsService) {}

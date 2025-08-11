@@ -6,10 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { LeadsService } from './leads.service';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+
 import { Leads as LeadsAsked } from './dto/create-lead.dto';
 
+@UseGuards(AuthGuard)
 @Controller('leads')
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}

@@ -5,11 +5,17 @@ import {
   Body,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
+
 import { ConfigurationsService } from './configurations.service';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+
 import { CreateConfigurationsDto } from './dto/create-configurations.dto';
 import { UpdateConfigurationsDto } from './dto/update-configurations.dto';
 
+@UseGuards(AuthGuard)
 @Controller('configurations')
 export class ConfigurationsController {
   constructor(private readonly configurationsService: ConfigurationsService) {}

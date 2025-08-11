@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
 } from '@nestjs/common';
 import { ProspectsService } from './prospects.service';
 import { Prospect } from './dto/create-prospect.dto';
