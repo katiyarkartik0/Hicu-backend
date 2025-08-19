@@ -1,27 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePineconeDto } from './dto/create-pinecone.dto';
-import { UpdatePineconeDto } from './dto/update-pinecone.dto';
 import {
   Pinecone as PineconeClient,
   Index as PineconeIndex,
 } from '@pinecone-database/pinecone';
-import { PineconeStore } from '@langchain/pinecone';
 import type { Document } from '@langchain/core/documents';
 import { ConfigurationsService } from 'src/configurations/configurations.service';
 import { CONFIGURATIONS_VARIABLES } from 'src/shared/constants';
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
-import { TaskType } from '@google/generative-ai';
 import { OpenAIEmbeddings } from '@langchain/openai';
 @Injectable()
 export class PineconeService {
   private pinecone: PineconeClient;
   private pineconeIndex: PineconeIndex;
-  private embeddingsMicroservice: string;
   constructor(private readonly configurationsService: ConfigurationsService) {
     this.pinecone = new PineconeClient();
     // Will automatically read the PINECONE_API_KEY and PINECONE_ENVIRONMENT env vars
     this.pineconeIndex = this.pinecone.Index(process.env.PINECONE_INDEX!);
-    this.embeddingsMicroservice = `http://127.0.0.1:8000/api/v1/embeddings/`;
   }
 
   private async getOpenAiApiKey({
