@@ -71,10 +71,4 @@ export class PineconeController {
     );
     return result;
   }
-
-  @Get('get')
-  async get() {
-    const res = await this.pineconeService.get();
-    return res;
-  }
 }

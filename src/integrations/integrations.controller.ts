@@ -16,7 +16,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateIntegrationDto } from './dto/create-integration.dto';
 import { UpdateIntegrationDto } from './dto/update-integration.dto';
 
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Controller('integrations')
 export class IntegrationsController {
   constructor(private readonly integrationsService: IntegrationsService) {}

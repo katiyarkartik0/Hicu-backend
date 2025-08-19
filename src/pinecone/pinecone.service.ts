@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePineconeDto } from './dto/create-pinecone.dto';
 import { UpdatePineconeDto } from './dto/update-pinecone.dto';
-import { OpenAIEmbeddings } from '@langchain/openai';
 import {
   Pinecone as PineconeClient,
   Index as PineconeIndex,
@@ -12,7 +11,7 @@ import { ConfigurationsService } from 'src/configurations/configurations.service
 import { CONFIGURATIONS_VARIABLES } from 'src/shared/constants';
 import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { TaskType } from '@google/generative-ai';
-
+import { OpenAIEmbeddings } from '@langchain/openai';
 @Injectable()
 export class PineconeService {
   private pinecone: PineconeClient;
@@ -46,24 +45,23 @@ export class PineconeService {
     documents: Document[],
     ids: string[],
   ) {
-    const items = documents.map((doc, i) => ({
-      pageContent: doc.pageContent,
-      metadata: doc.metadata,
-      id: ids[i],
-    }));
-
-    const response = await fetch(this.embeddingsMicroservice, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+    const openAiApiKey = await this.getOpenAiApiKey({ accountId });
+    const embeddings = new OpenAIEmbeddings({
+      apiKey: openAiApiKey,
+      model: 'text-embedding-3-small',
     });
+    const vectors = await Promise.all(
+      documents.map(async (doc, i) => {
+        const embedding = await embeddings.embedQuery(doc.pageContent);
+        return {
+          id: ids[i],
+          values: embedding,
+          metadata: doc.metadata,
+        };
+      }),
+    );
 
-    const { vectors } = await response.json();
-
-    if (!vectors || !Array.isArray(vectors)) {
-      throw new Error('Invalid embeddings response from microservice');
-    }
-
+    // Upsert to Pinecone
     const namespace = this.pinecone
       .index(process.env.PINECONE_INDEX!)
       .namespace(`${accountId}`);
@@ -74,26 +72,14 @@ export class PineconeService {
       message: `Upserted ${vectors.length} vectors for accountId: ${accountId}`,
     };
   }
-  async get() {
-    const res = await this.search({ accountId: 1, query: 'how much does the beanie cost?' });
-    return res;
-  }
+
   async search({ accountId, query }: { accountId: number; query: string }) {
-    const response = await fetch(this.embeddingsMicroservice, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        items: [{ id: 'query', pageContent: query, metadata: {} }],
-      }),
+    const openAiApiKey = await this.getOpenAiApiKey({ accountId });
+    const embeddings = new OpenAIEmbeddings({
+      apiKey: openAiApiKey,
+      model: 'text-embedding-3-small',
     });
-
-    const { vectors } = await response.json();
-
-    if (!vectors || !Array.isArray(vectors) || !vectors[0]?.values) {
-      throw new Error('Invalid embeddings response for query');
-    }
-
-    const queryVector = vectors[0].values;
+    const queryVector = await embeddings.embedQuery(query);
 
     const namespace = this.pinecone
       .index(process.env.PINECONE_INDEX!)
