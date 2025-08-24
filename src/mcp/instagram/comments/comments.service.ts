@@ -8,6 +8,7 @@ import { LeadsService } from 'src/leads/leads.service';
 import { ProspectsService } from 'src/prospects/prospects.service';
 
 import type { CommentLlmGraphState } from './comments.types';
+import type { SanitizedCommentPayload } from 'src/providers/instagram/instagram.types';
 
 @Injectable()
 export class CommentsService {
@@ -39,7 +40,7 @@ export class CommentsService {
       );
       return {
         userId: commenterId,
-        details: [],
+        details: {},
         lastLeadsGenerationAttempt: 0,
         totalLeadsGenerationAttempts: 0,
       };
@@ -98,15 +99,61 @@ export class CommentsService {
     }
   }
 
+  private async saveComment(
+    payload: SanitizedCommentPayload,
+    accountId: number,
+  ) {
+    return await this.instagramService.saveComment({
+      accountId,
+      id: payload.comment.commentId,
+      text: payload.comment.commentText,
+      username: payload.comment.commenterUsername,
+      userId: payload.comment.commenterId,
+      ...payload.comment,
+    });
+  }
+
+  private async createProspectIfNotAlready({
+    accountId,
+    userId,
+    username,
+  }: {
+    accountId: number;
+    userId: string;
+    username?: string;
+  }): Promise<CommentLlmGraphState['prospect']> {
+    const prospect = await this.prospectsService.findByAccountIdUserId({
+      accountId,
+      userId,
+    });
+    if (!prospect) {
+      return await this.prospectsService.create({
+        accountId,
+        userId,
+        username,
+        details: {},
+        lastLeadsGenerationAttempt: 0,
+        totalLeadsGenerationAttempts: 0,
+      });
+    }
+    return prospect;
+  }
+
   async handleComment(webhookPayload: any, accountId: number) {
     try {
-      const payload =
+      const payload: SanitizedCommentPayload =
         this.instagramUtilsService.sanitizeCommentPayload(webhookPayload);
 
+      await this.saveComment(payload, accountId);
       const {
-        comment: { commenterId },
+        comment: { commenterId, commenterUsername },
         media: { mediaOwnerId, mediaId },
       } = payload;
+      const prospect = await this.createProspectIfNotAlready({
+        accountId,
+        userId: commenterId,
+        username: commenterUsername,
+      });
 
       const igCommentAutomation =
         await this.automationService.findByIgCommentAutomationByMedia(mediaId);
@@ -114,8 +161,6 @@ export class CommentsService {
       if (!igCommentAutomation?.commentAutomationId) {
         return;
       }
-
-      const prospect = await this.getProspect({ commenterId, accountId });
 
       const leadsAsked = await this.getAskedLeads(accountId);
 

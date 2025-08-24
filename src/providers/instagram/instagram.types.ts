@@ -67,3 +67,36 @@ export type UserProfile = {
     data: MediaItem[];
   };
 };
+
+export type SanitizedCommentPayload = {
+  comment: {
+    commentId: string;
+    commenterUsername: string;
+    commenterId: string;
+    commentText: string;
+    mediaOwnerId: string;
+    mediaId: string;
+    parentCommentId: string | null;
+    isReply: boolean;
+    timestamp: string;
+  };
+  media: {
+    mediaOwnerId: string;
+    mediaId: string;
+  };
+};
+
+export type IgCommentDto = {
+  accountId: number;
+  id: string;
+  text: string;
+  username: string;
+  userId: string;
+  commentId: string;
+  mediaOwnerId: string;
+  mediaId: string;
+  parentCommentId: string | null;
+  isReply: boolean;
+  timestamp: string;
+  createdAt: string;
+};
