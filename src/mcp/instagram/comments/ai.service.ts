@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { CommentLlmGraphState } from './comments.types';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AiService {
@@ -31,13 +32,12 @@ Return only the message to be sent.
     }
   }
   async generateLeadsExtractionText(
-    details: Record<string, any>,
+    details: Prisma.JsonValue,
     requirements: string[],
     commentText: string,
     accountId: number,
   ): Promise<string> {
-
-    console.log(details,requirements,commentText,accountId,"here")
+    console.log(details, requirements, commentText, accountId, 'here');
     const prompt = `
 You're an assistant generating polite, helpful follow-up messages to collect missing information from a lead.
 

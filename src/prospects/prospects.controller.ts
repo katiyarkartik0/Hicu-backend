@@ -1,19 +1,19 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { ProspectsService } from './prospects.service';
 import { Prospect } from './dto/create-prospect.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('prospects')
 export class ProspectsController {
   constructor(private readonly prospectsService: ProspectsService) {}
 
   @Post()
-  async create(@Body() createProspectDto: Prospect) {
+  async create(
+    @Body()
+    createProspectDto: Omit<Prospect, 'details'> & {
+      details: Prisma.JsonObject;
+    },
+  ) {
     const prospect = await this.prospectsService.create(createProspectDto);
     return { data: prospect };
   }

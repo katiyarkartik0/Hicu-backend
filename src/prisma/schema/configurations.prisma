@@ -1,0 +1,10 @@
+model Configurations {
+  id            Int         @id @default(autoincrement())
+  accountId     Int
+  integrationId Int
+  config        Json
+  account       Account     @relation(fields: [accountId], references: [id])
+  integration   Integration @relation(fields: [integrationId], references: [id])
+
+  @@unique([accountId, integrationId])
+}

@@ -6,7 +6,11 @@ import { Prisma } from '@prisma/client';
 @Injectable()
 export class ProspectsService {
   constructor(private readonly prismaService: PrismaService) {}
-  create(createProspectDto: Prospect) {
+  create(
+    createProspectDto: Omit<Prospect, 'details'> & {
+      details: Prisma.JsonObject;
+    },
+  ): Promise<Prospect> {
     return this.prismaService.prospect.create({ data: createProspectDto });
   }
 
@@ -23,7 +27,7 @@ export class ProspectsService {
     accountId: number;
     userId: string;
     username?: string;
-    details: Record<string, any>;
+    details: Prisma.JsonObject;
   }) {
     const prospect = await this.prismaService.prospect.findUnique({
       where: {
@@ -45,6 +49,8 @@ export class ProspectsService {
         },
       });
     } else {
+      const lastDetails = prospect.details as Prisma.JsonObject;
+      const updatedDetails = { ...details, ...lastDetails };
       return await this.prismaService.prospect.update({
         where: {
           accountId_userId: {
@@ -52,7 +58,7 @@ export class ProspectsService {
             userId,
           },
         },
-        data: { details },
+        data: { details: updatedDetails },
       });
     }
   }
@@ -87,9 +93,6 @@ export class ProspectsService {
 
     if (!prospect) return null;
 
-    return {
-      ...prospect,
-      details: (prospect.details || {}) as Record<string, any>,
-    };
+    return prospect;
   }
 }

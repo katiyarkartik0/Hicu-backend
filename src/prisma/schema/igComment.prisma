@@ -1,0 +1,24 @@
+model IgComment {
+  accountId Int
+  account   Account @relation(fields: [accountId], references: [id])
+
+  id        String   @id // commentId
+  text      String
+  isReply   Boolean // commentText
+  timestamp DateTime // IG timestamp
+  createdAt DateTime @default(now()) // when stored locally
+
+  // User who wrote the comment
+  userId   String
+  username String
+
+  // Relation to Media (post)
+  mediaId      String
+  mediaOwnerId String
+  media        IgMedia @relation(fields: [mediaId, mediaOwnerId], references: [id, ownerId])
+
+  // Self-relation for replies
+  parentCommentId String?
+  parent          IgComment?  @relation("IgCommentReplies", fields: [parentCommentId], references: [id])
+  replies         IgComment[] @relation("IgCommentReplies")
+}

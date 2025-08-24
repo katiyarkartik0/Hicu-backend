@@ -1,0 +1,23 @@
+model Account {
+    id                  Int                   @id @default(autoincrement())
+    name                String
+    description         String?
+    website             String?
+    svgIcon             String?
+    createdAt           DateTime              @default(now())
+    updatedAt           DateTime              @updatedAt
+    igUserId            String?               @unique
+    igUsername          String?               @unique
+    igFollowers         Int?
+    igFollowing         Int?
+    igPostCount         Int?
+    members             AccountMember[]
+    configurations      Configurations[]
+    IgCommentAutomation IgCommentAutomation[]
+    IgDmAutomation      IgDmAutomation?
+    Leads               Leads?
+    Prospect            Prospect[]
+    IgMedia             IgMedia[]
+    IgComment           IgComment[]
+    medias              IgMedia[]             @relation("AccountToMedia")
+}

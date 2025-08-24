@@ -1,0 +1,12 @@
+model Prospect {
+  id                           Int     @id @default(autoincrement())
+  userId                       String
+  username                     String?
+  accountId                    Int
+  details                      Json
+  lastLeadsGenerationAttempt   Int
+  totalLeadsGenerationAttempts Int
+  account                      Account @relation(fields: [accountId], references: [id])
+
+  @@unique([accountId, userId])
+}

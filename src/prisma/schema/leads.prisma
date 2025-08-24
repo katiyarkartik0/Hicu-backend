@@ -1,0 +1,8 @@
+model Leads {
+  id                                Int      @id @default(autoincrement())
+  accountId                         Int      @unique
+  requirements                      String[]
+  maxGenerationAttemptsPerProspect  Int
+  minGapBetweenPerGenerationAttempt Int
+  account                           Account  @relation(fields: [accountId], references: [id])
+}

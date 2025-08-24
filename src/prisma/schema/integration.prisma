@@ -1,0 +1,8 @@
+model Integration {
+  id            Int              @id @default(autoincrement())
+  name          String           @unique
+  image         String?
+  description   String?
+  config        Json
+  configuraions Configurations[]
+}

@@ -1,0 +1,7 @@
+model IgCommentAutomation {
+  id                  Int     @id @default(autoincrement())
+  mediaId             String  @unique
+  accountId           Int
+  commentAutomationId Int     @default(0)
+  account             Account @relation(fields: [accountId], references: [id])
+}

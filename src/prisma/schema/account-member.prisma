@@ -1,0 +1,13 @@
+model AccountMember {
+  id        Int          @id @default(autoincrement())
+  accountId Int
+  memberId  Int
+  status    MemberStatus @default(INVITED)
+  scope     String[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  account   Account      @relation(fields: [accountId], references: [id])
+  member    Member       @relation(fields: [memberId], references: [id])
+
+  @@unique([accountId, memberId])
+}

@@ -1,0 +1,11 @@
+model IgMedia {
+    accountId Int
+    id        String // mediaId
+    ownerId   String // mediaOwnerId
+    comments  IgComment[]
+
+    owner   Account @relation("AccountToMedia", fields: [ownerId], references: [igUserId])
+    account Account @relation(fields: [accountId], references: [id])
+
+    @@id([id, ownerId]) // composite key since mediaId alone might not be unique across owners
+}
