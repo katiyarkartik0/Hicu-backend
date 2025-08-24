@@ -10,6 +10,7 @@ export class InstagramService {
 
   respondToComment: CommentService['respondToComment'];
   getCommentsByPostId: CommentService['getCommentsByPostId'];
+  saveComment: CommentService['save'];
 
   getConversationHistory: DmService['getConversationHistory'];
   sendDM: DmService['sendDM'];
@@ -20,9 +21,9 @@ export class InstagramService {
   getPostInfoByReplyId: PostService['getPostInfoByReplyId'];
   getPostInfoByMediaId: PostService['getPostInfoByMediaId'];
 
-  getInstagramAccessToken:PrivateInfoService['getInstagramAccessToken']
-  getMyDetails:PrivateInfoService['getMyDetails']
-  
+  getInstagramAccessToken: PrivateInfoService['getInstagramAccessToken'];
+  getMyDetails: PrivateInfoService['getMyDetails'];
+
   constructor(
     private readonly commentService: CommentService,
     private readonly dmService: DmService,
@@ -30,22 +31,39 @@ export class InstagramService {
     private readonly postService: PostService,
   ) {
     // CommentService bindings
-    this.respondToComment = this.commentService.respondToComment.bind(this.commentService);
-    this.getCommentsByPostId = this.commentService.getCommentsByPostId.bind(this.commentService);
+    this.saveComment = this.commentService.save.bind(this.commentService);
+    this.respondToComment = this.commentService.respondToComment.bind(
+      this.commentService,
+    );
+    this.getCommentsByPostId = this.commentService.getCommentsByPostId.bind(
+      this.commentService,
+    );
 
     // DmService bindings
-    this.getConversationHistory = this.dmService.getConversationHistory.bind(this.dmService);
+    this.getConversationHistory = this.dmService.getConversationHistory.bind(
+      this.dmService,
+    );
     this.sendDM = this.dmService.sendDM.bind(this.dmService);
-    this.sendDmForExistingConversation = this.dmService.sendDmForExistingConversation.bind(this.dmService);
+    this.sendDmForExistingConversation =
+      this.dmService.sendDmForExistingConversation.bind(this.dmService);
     this.sendImageInDm = this.dmService.sendImageInDm.bind(this.dmService);
 
     // PostService bindings
     this.getAllPosts = this.postService.getAllPosts.bind(this.postService);
-    this.getPostInfoByReplyId = this.postService.getPostInfoByReplyId.bind(this.postService);
-    this.getPostInfoByMediaId = this.postService.getPostInfoByMediaId.bind(this.postService);
+    this.getPostInfoByReplyId = this.postService.getPostInfoByReplyId.bind(
+      this.postService,
+    );
+    this.getPostInfoByMediaId = this.postService.getPostInfoByMediaId.bind(
+      this.postService,
+    );
 
     // PrivateInfoService bindings
-    this.getInstagramAccessToken = this.privateInfoService.getInstagramAccessToken.bind(this.privateInfoService);
-    this.getMyDetails = this.privateInfoService.getMyDetails.bind(this.privateInfoService);
+    this.getInstagramAccessToken =
+      this.privateInfoService.getInstagramAccessToken.bind(
+        this.privateInfoService,
+      );
+    this.getMyDetails = this.privateInfoService.getMyDetails.bind(
+      this.privateInfoService,
+    );
   }
 }

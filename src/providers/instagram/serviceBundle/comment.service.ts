@@ -4,12 +4,21 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrivateInfoService } from './privateInfo.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { IgCommentDto, SanitizedCommentPayload } from '../instagram.types';
 
 @Injectable()
 export class CommentService {
   private readonly logger = new Logger(CommentService.name);
 
-  constructor(private readonly privateInfoService: PrivateInfoService) {}
+  constructor(
+    private readonly privateInfoService: PrivateInfoService,
+    private readonly prismaService: PrismaService,
+  ) {}
+
+  async save(comment: Omit<IgCommentDto,"createdAt">) {
+    return this.prismaService.igComment.create({ data: comment });
+  }
 
   async respondToComment(
     commentId: string,
@@ -23,7 +32,7 @@ export class CommentService {
         },
       );
 
-      const url = `https://graph.instagram.com/v22.0/${commentId}/replies`;
+      const url = `https://graph.facebook.com/v22.0/${commentId}/replies`;
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

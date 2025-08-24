@@ -25,7 +25,7 @@ export class DmService {
         accountId,
       });
   
-      const url = `https://graph.instagram.com/${mediaOwnerId}/messages`;
+      const url = `https://graph.facebook.com/v21.0/${mediaOwnerId}/messages`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
