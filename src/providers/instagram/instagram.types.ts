@@ -92,7 +92,6 @@ export type IgCommentDto = {
   text: string;
   username: string;
   userId: string;
-  commentId: string;
   mediaOwnerId: string;
   mediaId: string;
   parentCommentId: string | null;

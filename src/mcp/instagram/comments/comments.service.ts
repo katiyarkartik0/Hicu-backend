@@ -109,7 +109,11 @@ export class CommentsService {
       text: payload.comment.commentText,
       username: payload.comment.commenterUsername,
       userId: payload.comment.commenterId,
-      ...payload.comment,
+      mediaOwnerId: payload.comment.mediaOwnerId,
+      mediaId: payload.comment.mediaId,
+      parentCommentId: payload.comment.parentCommentId,
+      timestamp: payload.comment.timestamp,
+      isReply: payload.comment.isReply,
     });
   }
 
