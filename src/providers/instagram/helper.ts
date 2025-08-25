@@ -1,4 +1,4 @@
-import { MediaItem, UserProfile } from './instagram.types';
+import {  IgUserProfile } from './instagram.types';
 
 export const accountDetailsHelper = {
   instagramFields: [
@@ -11,9 +11,8 @@ export const accountDetailsHelper = {
     'follows_count',
     'media_count',
     'account_type',
-    'media{id,caption,media_type,media_url,thumbnail_url,timestamp}',
   ].join(','),
-  transformToUserProfile: function (webhookProfileResponse: any): UserProfile {
+  transformToUserProfile: function (webhookProfileResponse: any): IgUserProfile {
     const {
       id,
       name,
@@ -24,40 +23,18 @@ export const accountDetailsHelper = {
       follows_count,
       media_count,
       account_type,
-      media,
     } = webhookProfileResponse;
 
-    const mediaItems: MediaItem[] = (media?.data || []).map(
-      ({
-        id,
-        media_type,
-        media_url,
-        caption,
-        thumbnail,
-        timestamp,
-      }: any): MediaItem => ({
-        id,
-        mediaType: media_type,
-        mediaUrl: media_url,
-        caption,
-        timestamp,
-        thumbnail,
-      }),
-    );
-
     return {
-      id,
-      name,
-      username,
-      biography,
-      profilePictureUrl: profile_picture_url,
-      followersCount: followers_count,
-      followsCount: follows_count,
-      mediaCount: media_count,
-      accountType: account_type,
-      media: {
-        data: mediaItems,
-      },
+      igUserId:id,
+      igName:name,
+      igUsername:username,
+      igBiography:biography,
+      igProfilePictureUrl: profile_picture_url,
+      igFollowersCount: followers_count,
+      igFollowingCount: follows_count,
+      igMediaCount: media_count,
+      igAccountType: account_type,
     };
   },
 };

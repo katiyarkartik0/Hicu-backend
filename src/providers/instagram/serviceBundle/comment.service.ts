@@ -32,15 +32,13 @@ export class CommentService {
         },
       );
 
-      const url = `https://graph.facebook.com/v22.0/${commentId}/replies`;
+      const url = `https://graph.instagram.com/v22.0/${commentId}/replies?access_token=${accessToken}`;
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message,
-          access_token: accessToken,
-        }),
+        body: JSON.stringify({ message }),
       });
+      
 
       if (!response.ok) {
         const errorBody = await response.text();

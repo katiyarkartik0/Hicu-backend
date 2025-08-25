@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAccountDto } from './dto/create-account.dto';
+import { AccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AccountService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createAccount(createAccountDto: CreateAccountDto) {
+  async createAccount(createAccountDto: AccountDto) {
     return await this.prisma.account.create({
       data: createAccountDto,
     });

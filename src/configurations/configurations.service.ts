@@ -89,6 +89,7 @@ export class ConfigurationsService {
       }
 
       let decryptedConfig = {};
+      console.log(integration)
       Object.keys(integration.config).forEach((name) => {
         decryptedConfig = {
           ...decryptedConfig,

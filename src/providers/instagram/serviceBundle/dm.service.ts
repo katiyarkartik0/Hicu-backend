@@ -20,12 +20,18 @@ export class DmService {
     message: string,
     accountId: number,
   ) {
-    try{
-      const accessToken = await this.privateInfoService.getInstagramAccessToken({
+    try {
+      const accessToken = await this.privateInfoService.getInstagramAccessToken(
+        {
+          accountId,
+        },
+      );
+
+      const { igUserId } = await this.privateInfoService.getMyDetails({
         accountId,
       });
-  
-      const url = `https://graph.facebook.com/v21.0/${mediaOwnerId}/messages`;
+
+      const url = `https://graph.instagram.com/v21.0/${igUserId}/messages`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -37,23 +43,21 @@ export class DmService {
           message: { text: message },
         }),
       });
-  
+
       if (!response.ok) {
         const errorBody = await response.text();
         this.logger.error(`Failed to send DM: ${errorBody}`);
         throw new InternalServerErrorException(`Failed to send DM`);
       }
-  
+
       return response.json();
-    }
-    catch(error){
+    } catch (error) {
       this.logger.error(
         `[sendDM] Error sending DM for comment ${commentId} on account ${accountId}`,
         error.stack || error.message,
       );
       throw new InternalServerErrorException(error.message);
     }
-
   }
 
   async sendDmForExistingConversation({
@@ -69,9 +73,11 @@ export class DmService {
       const accessToken = await this.privateInfoService.getInstagramAccessToken(
         { accountId },
       );
-      const { id } = await this.privateInfoService.getMyDetails({ accountId });
+      const { igUserId } = await this.privateInfoService.getMyDetails({
+        accountId,
+      });
 
-      const url = `https://graph.instagram.com/${id}/messages`;
+      const url = `https://graph.instagram.com/${igUserId}/messages`;
 
       this.logger.debug(
         `[sendDmForExistingConversation] Sending DM to ${recipientId}: ${message}`,
@@ -113,7 +119,9 @@ export class DmService {
     const accessToken = await this.privateInfoService.getInstagramAccessToken({
       accountId,
     });
-    const { id } = await this.privateInfoService.getMyDetails({ accountId });
+    const { igUserId } = await this.privateInfoService.getMyDetails({
+      accountId,
+    });
     const payload = {
       recipient: { id: recipientId },
       message: {
@@ -127,7 +135,7 @@ export class DmService {
     };
     try {
       const response = await fetch(
-        `https://graph.instagram.com/v21.0/${id}/messages`,
+        `https://graph.instagram.com/v21.0/${igUserId}/messages`,
         {
           method: 'POST',
           headers: {

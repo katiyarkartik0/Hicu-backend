@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AccountService } from './account.service';
-import { CreateAccountDto } from './dto/create-account.dto';
+import { AccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
@@ -19,7 +19,7 @@ export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
   @Post()
-  createAccount(@Body() createAccountDto: CreateAccountDto) {
+  createAccount(@Body() createAccountDto: AccountDto) {
     return this.accountService.createAccount(createAccountDto);
   }
 

@@ -53,19 +53,16 @@ export type MediaItem = {
   thumbnail: string;
 };
 
-export type UserProfile = {
-  id: string;
-  name: string;
-  username: string;
-  biography: string;
-  profilePictureUrl: string;
-  followersCount: number;
-  followsCount: number;
-  mediaCount: number;
-  accountType: string;
-  media: {
-    data: MediaItem[];
-  };
+export type IgUserProfile = {
+  igUserId: string;
+  igName: string;
+  igUsername: string;
+  igBiography: string;
+  igProfilePictureUrl: string;
+  igFollowersCount: number;
+  igFollowingCount: number;
+  igMediaCount: number;
+  igAccountType: string;
 };
 
 export type SanitizedCommentPayload = {

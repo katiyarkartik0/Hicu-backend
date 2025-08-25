@@ -15,7 +15,7 @@ model IgComment {
   // Relation to Media (post)
   mediaId      String
   mediaOwnerId String
-  media        IgMedia @relation(fields: [mediaId, mediaOwnerId], references: [id, ownerId])
+  media        IgMedia @relation(fields: [mediaId], references: [id])
 
   // Self-relation for replies
   parentCommentId String?

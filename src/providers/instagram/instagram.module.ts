@@ -10,11 +10,13 @@ import { PrivateInfoService } from './serviceBundle/privateInfo.service';
 
 import { ConfigurationsModule } from 'src/configurations/configurations.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { AccountModule } from 'src/account/account.module';
 
 @Module({
   imports: [
     ConfigurationsModule,
-    PrismaModule
+    PrismaModule,
+    AccountModule
   ],
   controllers: [InstagramController],
   providers: [

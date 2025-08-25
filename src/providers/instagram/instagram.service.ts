@@ -17,12 +17,14 @@ export class InstagramService {
   sendDmForExistingConversation: DmService['sendDmForExistingConversation'];
   sendImageInDm: DmService['sendImageInDm'];
 
-  getAllPosts: PostService['getAllPosts'];
+  getAllSavedPosts: PostService['getAllSavedPosts'];
   getPostInfoByReplyId: PostService['getPostInfoByReplyId'];
   getPostInfoByMediaId: PostService['getPostInfoByMediaId'];
+  syncPosts: PostService['syncPosts'];
 
   getInstagramAccessToken: PrivateInfoService['getInstagramAccessToken'];
   getMyDetails: PrivateInfoService['getMyDetails'];
+  syncProfile: PrivateInfoService['syncProfile'];
 
   constructor(
     private readonly commentService: CommentService,
@@ -49,13 +51,16 @@ export class InstagramService {
     this.sendImageInDm = this.dmService.sendImageInDm.bind(this.dmService);
 
     // PostService bindings
-    this.getAllPosts = this.postService.getAllPosts.bind(this.postService);
+    this.getAllSavedPosts = this.postService.getAllSavedPosts.bind(
+      this.postService,
+    );
     this.getPostInfoByReplyId = this.postService.getPostInfoByReplyId.bind(
       this.postService,
     );
     this.getPostInfoByMediaId = this.postService.getPostInfoByMediaId.bind(
       this.postService,
     );
+    this.syncPosts = this.postService.syncPosts.bind(this.postService);
 
     // PrivateInfoService bindings
     this.getInstagramAccessToken =
@@ -63,6 +68,9 @@ export class InstagramService {
         this.privateInfoService,
       );
     this.getMyDetails = this.privateInfoService.getMyDetails.bind(
+      this.privateInfoService,
+    );
+    this.syncProfile = this.privateInfoService.syncProfile.bind(
       this.privateInfoService,
     );
   }

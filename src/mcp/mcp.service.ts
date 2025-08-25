@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { CommentsService } from './instagram/comments/comments.service';
 import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
@@ -15,7 +19,7 @@ export class McpService {
     private readonly igDmService: DmsService,
   ) {}
 
-  private async  isCommentFromSelf (
+  private async isCommentFromSelf(
     comment: any,
     accountId: number,
   ): Promise<boolean> {
@@ -24,9 +28,10 @@ export class McpService {
 
     if (!commenterId || !commenterUsername) return false;
 
-    const { id: myId, username: myUsername } = await this.instagramService.getMyDetails({
-      accountId,
-    });
+    const { igUserId: myId, igUsername: myUsername } =
+      await this.instagramService.getMyDetails({
+        accountId,
+      });
 
     return commenterId === myId || commenterUsername === myUsername;
   }
@@ -45,10 +50,7 @@ export class McpService {
       if (eventHelpers.isValidCommentEvent(body)) {
         const entry = body.entry[0];
         const comment = entry.changes?.[0]?.value;
-        const isFromSelf = await this.isCommentFromSelf(
-          comment,
-          accountId,
-        );
+        const isFromSelf = await this.isCommentFromSelf(comment, accountId);
         return isFromSelf ? COMMENT_ECHO : COMMENTS;
       }
 

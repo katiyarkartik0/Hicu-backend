@@ -1,11 +1,13 @@
 model IgMedia {
     accountId Int
-    id        String // mediaId
-    ownerId   String // mediaOwnerId
+    id        String      @unique // mediaId 
+    caption   String? // caption of the post
+    mediaUrl  String // media URL
+    mediaType String // IMAGE, VIDEO, etc.
+    timestamp DateTime // when the media was posted
+    createdAt DateTime    @default(now()) // when we saved it locally
+    updatedAt DateTime    @updatedAt // last time we updated locally
     comments  IgComment[]
 
-    owner   Account @relation("AccountToMedia", fields: [ownerId], references: [igUserId])
     account Account @relation(fields: [accountId], references: [id])
-
-    @@id([id, ownerId]) // composite key since mediaId alone might not be unique across owners
 }
