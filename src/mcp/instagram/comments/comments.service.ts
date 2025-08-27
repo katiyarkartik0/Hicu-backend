@@ -99,7 +99,7 @@ export class CommentsService {
     }
   }
 
-  private async saveComment(
+  async saveComment(
     payload: SanitizedCommentPayload,
     accountId: number,
   ) {
@@ -148,7 +148,6 @@ export class CommentsService {
       const payload: SanitizedCommentPayload =
         this.instagramUtilsService.sanitizeCommentPayload(webhookPayload);
 
-      await this.saveComment(payload, accountId);
       const {
         comment: { commenterId, commenterUsername },
         media: { mediaOwnerId, mediaId },

@@ -11,6 +11,7 @@ export class InstagramService {
   respondToComment: CommentService['respondToComment'];
   getCommentsByPostId: CommentService['getCommentsByPostId'];
   saveComment: CommentService['save'];
+  getThreads: CommentService['getThreads'];
 
   getConversationHistory: DmService['getConversationHistory'];
   sendDM: DmService['sendDM'];
@@ -40,6 +41,8 @@ export class InstagramService {
     this.getCommentsByPostId = this.commentService.getCommentsByPostId.bind(
       this.commentService,
     );
+    this.getThreads =
+      this.commentService.getThreads.bind(this.commentService);
 
     // DmService bindings
     this.getConversationHistory = this.dmService.getConversationHistory.bind(

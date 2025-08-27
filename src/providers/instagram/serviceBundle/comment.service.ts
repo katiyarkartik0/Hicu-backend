@@ -16,7 +16,7 @@ export class CommentService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async save(comment: Omit<IgCommentDto,"createdAt">) {
+  async save(comment: Omit<IgCommentDto, 'createdAt'>) {
     return this.prismaService.igComment.create({ data: comment });
   }
 
@@ -38,7 +38,6 @@ export class CommentService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message }),
       });
-      
 
       if (!response.ok) {
         const errorBody = await response.text();
@@ -83,5 +82,56 @@ export class CommentService {
         error.message,
       );
     }
+  }
+
+  async getThreads(accountId: number, userId: string) {
+    // Step 1: Fetch all comments for this user
+    const userComments = await this.prismaService.igComment.findMany({
+      where: { userId, accountId },
+    });
+
+    // Step 2: Split them into parent comments & replies
+    const parentCommentIds: string[] = [];
+    const replyParentIds: string[] = [];
+
+    for (const c of userComments) {
+      if (c.parentCommentId) {
+        // It's a reply → we want the parent thread
+        replyParentIds.push(c.parentCommentId);
+      } else {
+        // It's a top-level parent → we want it and its replies
+        parentCommentIds.push(c.id);
+      }
+    }
+
+    // Step 3: Fetch parent comments (with replies)
+    const parentThreads = await this.prismaService.igComment.findMany({
+      where: {
+        id: { in: parentCommentIds },
+        accountId,
+      },
+      include: {
+        replies: true,
+      },
+    });
+
+    // Step 4: Fetch parent threads for replies
+    const replyThreads = await this.prismaService.igComment.findMany({
+      where: {
+        id: { in: replyParentIds },
+        accountId,
+      },
+      include: {
+        replies: true,
+      },
+    });
+
+    // Step 5: Merge & deduplicate threads
+    const threads = [...parentThreads, ...replyThreads].filter(
+      (thread, index, self) =>
+        index === self.findIndex((t) => t.id === thread.id),
+    );
+
+    return threads ||  [];
   }
 }

@@ -39,4 +39,16 @@ export class InstagramController {
   async syncPosts(@Query('accountId') accountId: number) {
     return await this.instagramService.syncPosts(accountId);
   }
+
+  @Get('getThreads/:userId')
+  async getThreads(
+    @Param('userId') userId: string,
+    @Query('accountId') accountId: number,
+  ) {
+    console.log(userId,accountId)
+    return await this.instagramService.getThreads(
+      accountId,
+      userId,
+    );
+  }
 }

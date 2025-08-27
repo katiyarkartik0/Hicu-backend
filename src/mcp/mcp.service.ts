@@ -8,6 +8,8 @@ import { CommentsService } from './instagram/comments/comments.service';
 import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
 import { DmsService } from './instagram/dms/dms.service';
 import { eventHelpers } from './helpers';
+import { InstagramUtilsService } from './instagram/instagram-utils.service';
+import { SanitizedCommentPayload } from 'src/providers/instagram/instagram.types';
 
 @Injectable()
 export class McpService {
@@ -17,6 +19,7 @@ export class McpService {
     private readonly instagramService: InstagramService,
     private readonly igCommentsService: CommentsService,
     private readonly igDmService: DmsService,
+    private readonly instagramUtilsService: InstagramUtilsService,
   ) {}
 
   private async isCommentFromSelf(
@@ -74,7 +77,7 @@ export class McpService {
 
   async handleIgWebhook(payload: any, accountId: number) {
     try {
-      const { COMMENTS, DM_RECEIVED } = INSTAGRAM_EVENTS;
+      const { COMMENTS, DM_RECEIVED, COMMENT_ECHO } = INSTAGRAM_EVENTS;
       const eventType = await this.getInstagramEventType(payload, accountId);
       switch (eventType) {
         case DM_RECEIVED:
@@ -83,6 +86,10 @@ export class McpService {
         case COMMENTS:
           await this.igCommentsService.handleComment(payload, accountId);
           break;
+        case COMMENT_ECHO:
+          const sanitizedPayload: SanitizedCommentPayload =
+            this.instagramUtilsService.sanitizeCommentPayload(payload);
+          await this.igCommentsService.saveComment(sanitizedPayload, accountId);
       }
     } catch (error) {
       console.error(error);
