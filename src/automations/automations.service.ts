@@ -9,7 +9,7 @@ export class AutomationsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   createIgCommentAutomation(data: Omit<IgCommentAutomation, 'id'>) {
-    return this.prismaService.igCommentAutomation.create({ data:{...data,id:3} });
+    return this.prismaService.igCommentAutomation.create({ data });
   }
 
   findAllIgCommentAutomation({ accountId }: { accountId: number }) {

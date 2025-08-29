@@ -84,12 +84,21 @@ export class McpService {
           await this.igDmService.handleDm(payload, accountId);
           break;
         case COMMENTS:
+          const sanitizedPayloadComment: SanitizedCommentPayload =
+            this.instagramUtilsService.sanitizeCommentPayload(payload);
+          await this.igCommentsService.saveComment(
+            sanitizedPayloadComment,
+            accountId,
+          );
           await this.igCommentsService.handleComment(payload, accountId);
           break;
         case COMMENT_ECHO:
-          const sanitizedPayload: SanitizedCommentPayload =
+          const sanitizedPayloadCommentEcho: SanitizedCommentPayload =
             this.instagramUtilsService.sanitizeCommentPayload(payload);
-          await this.igCommentsService.saveComment(sanitizedPayload, accountId);
+          await this.igCommentsService.saveComment(
+            sanitizedPayloadCommentEcho,
+            accountId,
+          );
       }
     } catch (error) {
       console.error(error);

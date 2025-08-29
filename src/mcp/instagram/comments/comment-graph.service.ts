@@ -18,7 +18,7 @@ export class CommentGraphService {
     private aiService: AiService,
     private instagramService: InstagramService,
     private pineconeService: PineconeService,
-    private readonly automationService: AutomationsService,
+    // private readonly automationService: AutomationsService,
     private readonly geminiService: GeminiService,
     private readonly prospectsService: ProspectsService,
   ) {
