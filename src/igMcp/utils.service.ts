@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { CommentLlmGraphState } from './comments/comments.types';
 import { InstagramMessage } from 'src/providers/instagram/instagram.types';
 import { Type } from '@google/genai';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
-import type { SanitizedDmPayload } from './dms/dms.types';
+import { CommentLlmGraphState } from './comment/types';
+import { SanitizedDmPayload } from './dm/types.service';
 
 @Injectable()
-export class InstagramUtilsService {
-  private readonly logger = new Logger(InstagramUtilsService.name);
+export class UtilsService {
+  private readonly logger = new Logger(UtilsService.name);
 
   constructor(private readonly geminiService: GeminiService) {}
   /**

@@ -11,15 +11,13 @@ import {
 import { WEBHOOK_PROVIDERS } from './types/webhook.types';
 import { WebhookService } from './webhook.service';
 import { InstagramService } from '../providers/instagram/instagram.service';
-import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
-import { McpService } from 'src/mcp/mcp.service';
+import { IgMcpService } from 'src/igMcp/igMcp.service';
 
 @Controller('webhook')
 export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
-    private readonly instagramService: InstagramService,
-    private readonly mcpService: McpService,
+    private readonly igMcpService: IgMcpService,
   ) {}
 
   @Get(':provider')
@@ -63,7 +61,7 @@ export class WebhookController {
       );
     }
     if (provider === INSTAGRAM) {
-      return await this.mcpService.handleIgWebhook(body, accountId);
+      return await this.igMcpService.handleIgWebhook(body, accountId);
     } else if (!WEBHOOK_PROVIDERS.hasOwnProperty(provider)) {
       throw new BadRequestException('Unsupported provider');
     }

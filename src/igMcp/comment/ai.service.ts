@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
-import { CommentLlmGraphState } from './comments.types';
 import { Prisma } from '@prisma/client';
+import { CommentLlmGraphState } from './types';
 
 @Injectable()
 export class AiService {

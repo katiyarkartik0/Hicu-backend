@@ -1,23 +1,20 @@
 import { StateGraph, StateGraphArgs } from '@langchain/langgraph';
 import { Injectable, Logger } from '@nestjs/common';
-import { DmLlmGraphState } from './dms.types';
-import { AiService } from './ai.service';
+
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
-import { AutomationsService } from 'src/automations/automations.service';
-import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { ProspectsService } from 'src/prospects/prospects.service';
+import { AiService } from '../ai.service';
+import { DmLlmGraphState } from '../types.service';
 
 @Injectable()
-export class DmGraphService {
-  private readonly logger = new Logger(DmGraphService.name);
+export class BabbageGraphService {
+  private readonly logger = new Logger(BabbageGraphService.name);
 
   constructor(
     private aiService: AiService,
     private instagramService: InstagramService,
     private pineconeService: PineconeService,
-    private readonly automationService: AutomationsService,
-    private readonly geminiService: GeminiService,
     private readonly prospectsService: ProspectsService,
   ) {}
   getGraphChannels(): StateGraphArgs<DmLlmGraphState>['channels'] {
@@ -75,15 +72,15 @@ export class DmGraphService {
       channels: this.getGraphChannels(),
     });
 
-    // if (igDmAutomation.dmAutomationId === 1) {
     if (true) {
       graphBuilder
-        .addNode('feedback', this.respondToFeedbackInDm.bind(this))
-        .addNode('personal_details', this.handlePersonalDetails.bind(this))
-        .addNode('product_enquiry', this.handleProductEnquiry.bind(this))
-        .addConditionalEdges(
-          '__start__',
-          this.aiService.detectIntent.bind(this),
+        .addNode('feedback', (state) => this.respondToFeedbackInDm(state))
+        .addNode('personal_details', (state) =>
+          this.handlePersonalDetails(state),
+        )
+        .addNode('product_enquiry', (state) => this.handleProductEnquiry(state))
+        .addConditionalEdges('__start__', (state) =>
+          this.aiService.detectIntent(state),
         )
         .addEdge('feedback', '__end__')
         .addEdge('personal_details', '__end__')
