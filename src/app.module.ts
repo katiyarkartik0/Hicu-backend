@@ -17,7 +17,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { ConfigurationsModule } from './configurations/configurations.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { ShopifyModule } from './shopify/shopify.module';
-import { McpModule } from './mcp/mcp.module';
+import { IgMcpModule } from './igMcp/igMcp.module';
 import { PineconeModule } from './pinecone/pinecone.module';
 import { LeadsModule } from './leads/leads.module';
 import { ProspectsModule } from './prospects/prospects.module';
@@ -44,7 +44,7 @@ import { ProspectsModule } from './prospects/prospects.module';
     ConfigurationsModule,
     EncryptionModule,
     ShopifyModule,
-    McpModule,
+    IgMcpModule,
     PineconeModule,
     LeadsModule,
     ProspectsModule

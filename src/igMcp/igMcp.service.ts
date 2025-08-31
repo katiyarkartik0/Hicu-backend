@@ -4,22 +4,22 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InstagramService } from 'src/providers/instagram/instagram.service';
-import { CommentsService } from './instagram/comments/comments.service';
 import { INSTAGRAM_EVENTS } from 'src/shared/constants/instagram/events.constants';
-import { DmsService } from './instagram/dms/dms.service';
 import { eventHelpers } from './helpers';
-import { InstagramUtilsService } from './instagram/instagram-utils.service';
 import { SanitizedCommentPayload } from 'src/providers/instagram/instagram.types';
+import { CommentService } from './comment/index.service';
+import { UtilsService } from './utils.service';
+import { DmService } from './dm/index.service';
 
 @Injectable()
-export class McpService {
-  private readonly logger = new Logger(McpService.name);
+export class IgMcpService {
+  private readonly logger = new Logger(IgMcpService.name);
 
   constructor(
     private readonly instagramService: InstagramService,
-    private readonly igCommentsService: CommentsService,
-    private readonly igDmService: DmsService,
-    private readonly instagramUtilsService: InstagramUtilsService,
+    private readonly commentService: CommentService,
+    private readonly dmService: DmService,
+    private readonly utilsService: UtilsService,
   ) {}
 
   private async isCommentFromSelf(
@@ -81,28 +81,37 @@ export class McpService {
       const eventType = await this.getInstagramEventType(payload, accountId);
       switch (eventType) {
         case DM_RECEIVED:
-          await this.igDmService.handleDm(payload, accountId);
+          await this.dmService.handleDm(payload, accountId);
           break;
         case COMMENTS:
           const sanitizedPayloadComment: SanitizedCommentPayload =
-            this.instagramUtilsService.sanitizeCommentPayload(payload);
-          await this.igCommentsService.saveComment(
-            sanitizedPayloadComment,
-            accountId,
-          );
-          await this.igCommentsService.handleComment(payload, accountId);
+            this.utilsService.sanitizeCommentPayload(payload);
+          await this.saveComment(sanitizedPayloadComment, accountId);
+          await this.commentService.handleComment(payload, accountId);
           break;
         case COMMENT_ECHO:
           const sanitizedPayloadCommentEcho: SanitizedCommentPayload =
-            this.instagramUtilsService.sanitizeCommentPayload(payload);
-          await this.igCommentsService.saveComment(
-            sanitizedPayloadCommentEcho,
-            accountId,
-          );
+            this.utilsService.sanitizeCommentPayload(payload);
+          await this.saveComment(sanitizedPayloadCommentEcho, accountId);
       }
     } catch (error) {
       console.error(error);
       throw new Error('Internal server error');
     }
+  }
+
+  async saveComment(payload: SanitizedCommentPayload, accountId: number) {
+    return await this.instagramService.saveComment({
+      accountId,
+      id: payload.comment.commentId,
+      text: payload.comment.commentText,
+      username: payload.comment.commenterUsername,
+      userId: payload.comment.commenterId,
+      mediaOwnerId: payload.comment.mediaOwnerId,
+      mediaId: payload.comment.mediaId,
+      parentCommentId: payload.comment.parentCommentId,
+      timestamp: payload.comment.timestamp,
+      isReply: payload.comment.isReply,
+    });
   }
 }

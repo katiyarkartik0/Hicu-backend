@@ -1,54 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { InstagramService } from 'src/providers/instagram/instagram.service';
-import { CommentGraphService } from './comment-graph.service';
-import { InstagramUtilsService } from '../instagram-utils.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { LeadsService } from 'src/leads/leads.service';
 import { ProspectsService } from 'src/prospects/prospects.service';
 
-import type { CommentLlmGraphState } from './comments.types';
 import type { SanitizedCommentPayload } from 'src/providers/instagram/instagram.types';
+import { TuringGraphService } from './graphs/turingGraph.service';
+import { UtilsService } from '../utils.service';
+import { CommentLlmGraphState } from './types';
 
 @Injectable()
-export class CommentsService {
-  private readonly logger = new Logger(CommentsService.name);
+export class CommentService {
+  private readonly logger = new Logger(CommentService.name);
 
   constructor(
     private readonly instagramService: InstagramService,
-    private readonly commentGraphService: CommentGraphService,
-    private readonly instagramUtilsService: InstagramUtilsService,
+    private readonly turingGraphService: TuringGraphService,
+    private readonly utilsService: UtilsService,
     private readonly automationService: AutomationsService,
     private readonly leadsService: LeadsService,
     private readonly prospectsService: ProspectsService,
   ) {}
-
-  private async getProspect({
-    commenterId,
-    accountId,
-  }): Promise<CommentLlmGraphState['prospect']> {
-    try {
-      const prospect = await this.prospectsService.findByAccountIdUserId({
-        accountId,
-        userId: commenterId,
-      });
-
-      if (prospect) return prospect;
-
-      this.logger.debug(
-        `Prospect not found. Returning default for ${commenterId}`,
-      );
-      return {
-        userId: commenterId,
-        details: {},
-        lastLeadsGenerationAttempt: 0,
-        totalLeadsGenerationAttempts: 0,
-      };
-    } catch (err) {
-      this.logger.error(`Failed to fetch prospect: ${err.message}`, err.stack);
-      throw err;
-    }
-  }
 
   private getSanitizedHistory({
     conversationHistory,
@@ -65,7 +38,7 @@ export class CommentsService {
         return { prospect: [], account: [] };
       }
 
-      return this.instagramUtilsService.sanitizeHistory(
+      return this.utilsService.sanitizeHistory(
         conversationHistory.messages.data,
         commenterId,
         mediaOwnerId,
@@ -99,24 +72,6 @@ export class CommentsService {
     }
   }
 
-  async saveComment(
-    payload: SanitizedCommentPayload,
-    accountId: number,
-  ) {
-    return await this.instagramService.saveComment({
-      accountId,
-      id: payload.comment.commentId,
-      text: payload.comment.commentText,
-      username: payload.comment.commenterUsername,
-      userId: payload.comment.commenterId,
-      mediaOwnerId: payload.comment.mediaOwnerId,
-      mediaId: payload.comment.mediaId,
-      parentCommentId: payload.comment.parentCommentId,
-      timestamp: payload.comment.timestamp,
-      isReply: payload.comment.isReply,
-    });
-  }
-
   private async createProspectIfNotAlready({
     accountId,
     userId,
@@ -146,7 +101,7 @@ export class CommentsService {
   async handleComment(webhookPayload: any, accountId: number) {
     try {
       const payload: SanitizedCommentPayload =
-        this.instagramUtilsService.sanitizeCommentPayload(webhookPayload);
+        this.utilsService.sanitizeCommentPayload(webhookPayload);
 
       const {
         comment: { commenterId, commenterUsername },
@@ -185,10 +140,17 @@ export class CommentsService {
       };
 
       this.logger.log(`Running graph for commenter ${commenterId}`);
-      await this.commentGraphService.runGraph(graphState);
+      await this.turingGraphService.runGraph(graphState);
     } catch (err) {
       this.logger.error('Error handling comment webhook', err.stack);
       throw err;
+    }
+  }
+
+  async handleAutomation(graphState: CommentLlmGraphState) {
+    const { igCommentAutomation } = graphState;
+    if (igCommentAutomation.commentAutomationId === 1) {
+      await this.turingGraphService.runGraph(graphState);
     }
   }
 

@@ -3,27 +3,22 @@ import { StateGraph, StateGraphArgs } from '@langchain/langgraph';
 
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
-import { AutomationsService } from 'src/automations/automations.service';
-import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
-import { AiService } from './ai.service';
 
-import type { CommentLlmGraphState } from './comments.types';
 import { ProspectsService } from 'src/prospects/prospects.service';
+import { CommentLlmGraphState } from '../types';
+import { AiService } from '../ai.service';
 
 @Injectable()
-export class CommentGraphService {
-  private readonly logger = new Logger(CommentGraphService.name);
+export class TuringGraphService {
+  private readonly logger = new Logger(TuringGraphService.name);
 
   constructor(
     private aiService: AiService,
     private instagramService: InstagramService,
     private pineconeService: PineconeService,
-    // private readonly automationService: AutomationsService,
-    private readonly geminiService: GeminiService,
+
     private readonly prospectsService: ProspectsService,
-  ) {
-    // automationService and eminiService are imported for this binding do not remove
-  }
+  ) {}
 
   getGraphChannels(): StateGraphArgs<CommentLlmGraphState>['channels'] {
     return {
@@ -79,32 +74,29 @@ export class CommentGraphService {
       channels: this.getGraphChannels(),
     });
 
-    if (igCommentAutomation.commentAutomationId === 1) {
-      graphBuilder
-        .addNode('feedback', this.respondToFeedbackInComments.bind(this))
-        .addNode('leadsNode', this.generateLeadsInDm.bind(this))
-        .addNode('product_enquiry', this.handleProductEnquiry.bind(this))
-        .addConditionalEdges(
-          '__start__',
-          this.aiService.detectIntent.bind(this),
-        )
-        .addEdge('feedback', 'leadsNode')
-        .addEdge('leadsNode', '__end__')
-        .addEdge('product_enquiry', '__end__');
+    graphBuilder
+      .addNode('feedback', (state) => this.respondToFeedbackInComments(state))
+      .addNode('leadsNode', (state) => this.generateLeadsInDm(state))
+      .addNode('product_enquiry', (state) => this.handleProductEnquiry(state))
+      .addConditionalEdges('__start__', (state) =>
+        this.aiService.detectIntent(state),
+      )
+      .addEdge('feedback', 'leadsNode')
+      .addEdge('leadsNode', '__end__')
+      .addEdge('product_enquiry', '__end__');
 
-      const graph = graphBuilder.compile();
+    const graph = graphBuilder.compile();
 
-      await graph.invoke({
-        conversationHistory,
-        commentPayload,
-        igAccount,
-        prospect,
-        accountId,
-        services,
-        leadsAsked,
-        igCommentAutomation,
-      });
-    }
+    await graph.invoke({
+      conversationHistory,
+      commentPayload,
+      igAccount,
+      prospect,
+      accountId,
+      services,
+      leadsAsked,
+      igCommentAutomation,
+    });
   }
 
   async respondToFeedbackInComments(
@@ -180,13 +172,12 @@ export class CommentGraphService {
         return { ...state, response: '' };
       }
 
-      const response =
-        await this.aiService.generateLeadsExtractionText(
-          details,
-          requirements,
-          commentText,
-          accountId,
-        );
+      const response = await this.aiService.generateLeadsExtractionText(
+        details,
+        requirements,
+        commentText,
+        accountId,
+      );
 
       this.logger.log(`Generated leads response: ${response}`);
 
@@ -199,11 +190,10 @@ export class CommentGraphService {
         accountId,
       );
 
-      await this.upsertProspect({
+      await this.handleLeadGenAttempt({
         accountId,
         userId,
         username: commenterUsername,
-        details,
       });
       this.logger.log(`Sent DM for commentId: ${commentId}`);
 
@@ -217,33 +207,15 @@ export class CommentGraphService {
     }
   }
 
-  private async upsertProspect({
+  private async handleLeadGenAttempt({
     accountId,
     userId,
     username,
-    details,
   }: {
     accountId: number;
     userId: string;
     username?: string;
-    details?: any | undefined;
   }) {
-    this.logger.log(
-      `Sent DM for commentId: ${{
-        accountId,
-        userId,
-        username,
-        details,
-      }}
-      {
-        accountId,
-        userId,
-        username,
-        details,
-      }
-      `,
-    );
-
     const now = Math.floor(Date.now() / (1000 * 60)); //in minutes
 
     const prospect = await this.prospectsService.findByAccountIdUserId({
@@ -255,7 +227,7 @@ export class CommentGraphService {
         accountId,
         userId,
         username,
-        details: details || {},
+        details: {},
         lastLeadsGenerationAttempt: now,
         totalLeadsGenerationAttempts: 1,
       });

@@ -1,24 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InstagramService } from 'src/providers/instagram/instagram.service';
-import { InstagramUtilsService } from '../instagram-utils.service';
 import { AutomationsService } from 'src/automations/automations.service';
 import { ProspectsService } from 'src/prospects/prospects.service';
-import { CommentLlmGraphState } from '../comments/comments.types';
 import { LeadsService } from 'src/leads/leads.service';
-import { DmGraphService } from './dm-graph.service';
-import { DmLlmGraphState } from './dms.types';
+import { UtilsService } from '../utils.service';
+import { BabbageGraphService } from './graphs/babbageGraph.service';
+import { DmLlmGraphState } from './types.service';
 
 @Injectable()
-export class DmsService {
+export class DmService {
   constructor(
     private readonly instagramService: InstagramService,
-    private readonly instagramUtilsService: InstagramUtilsService,
+    private readonly utilsService: UtilsService,
     private readonly automationService: AutomationsService,
     private readonly prospectsService: ProspectsService,
     private readonly leadsService: LeadsService,
-    private readonly dmGraphService: DmGraphService,
+    private readonly babbageGraphService: BabbageGraphService,
   ) {}
-  private readonly logger = new Logger(DmsService.name);
+  private readonly logger = new Logger(DmService.name);
 
   private async getProspect({ senderId, accountId }): Promise<any> {
     try {
@@ -44,8 +43,7 @@ export class DmsService {
     }
   }
   async handleDm(webhookPayload: any, accountId: number) {
-    const payload =
-    this.instagramUtilsService.sanitizeDmPayload(webhookPayload);
+    const payload = this.utilsService.sanitizeDmPayload(webhookPayload);
     const igDmAutomation =
       await this.automationService.findByIgDmAutomationByAccount(accountId);
     // if (!igDmAutomation?.dmAutomationId) {
@@ -81,21 +79,21 @@ export class DmsService {
     };
 
     this.logger.log(`Running graph for commenter ${senderId}`);
-    await this.dmGraphService.runGraph(graphState);
+    await this.handleAutomation(graphState);
   }
 
   private getSanitizedHistory({
     conversationHistory,
     senderId,
     recipientId,
-  }): CommentLlmGraphState['conversationHistory'] {
+  }): DmLlmGraphState['conversationHistory'] {
     try {
       if (!conversationHistory) {
         this.logger.debug('No conversation history found.');
         return { prospect: [], account: [] };
       }
 
-      return this.instagramUtilsService.sanitizeHistory(
+      return this.utilsService.sanitizeHistory(
         conversationHistory.messages.data,
         senderId,
         recipientId,
@@ -108,7 +106,7 @@ export class DmsService {
 
   private async getAskedLeads(
     accountId: number,
-  ): Promise<CommentLlmGraphState['leadsAsked']> {
+  ): Promise<DmLlmGraphState['leadsAsked']> {
     try {
       const leadsAsked = await this.leadsService.findByAccount(accountId);
 
@@ -127,5 +125,12 @@ export class DmsService {
       );
       throw err;
     }
+  }
+
+  async handleAutomation(graphState: DmLlmGraphState) {
+    const { igDmAutomation } = graphState;
+    // if (igDmAutomation?.dmAutomationId === 1) {
+    await this.babbageGraphService.runGraph(graphState);
+    // }
   }
 }
