@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ProspectsService } from './prospects.service';
 import { Prospect } from './dto/create-prospect.dto';
 import { Prisma } from '@prisma/client';
@@ -22,5 +30,17 @@ export class ProspectsController {
   async findAll(@Param('accountId') accountId: number) {
     const prospects = await this.prospectsService.findAll(accountId);
     return { data: prospects };
+  }
+
+  @Get()
+  async findOne(
+    @Query('accountId', ParseIntPipe) accountId: number,
+    @Query('userId') userId: string,
+  ) {
+    const prospect = await this.prospectsService.findByAccountIdUserId({
+      accountId,
+      userId,
+    });
+    return { data: prospect };
   }
 }
