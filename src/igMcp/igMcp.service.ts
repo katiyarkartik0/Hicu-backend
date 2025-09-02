@@ -10,6 +10,7 @@ import { SanitizedCommentPayload } from 'src/providers/instagram/instagram.types
 import { CommentService } from './comment/index.service';
 import { UtilsService } from './utils.service';
 import { DmService } from './dm/index.service';
+import { SanitizedDmPayload } from './dm/types';
 
 @Injectable()
 export class IgMcpService {
@@ -77,10 +78,19 @@ export class IgMcpService {
 
   async handleIgWebhook(payload: any, accountId: number) {
     try {
-      const { COMMENTS, DM_RECEIVED, COMMENT_ECHO } = INSTAGRAM_EVENTS;
+      const { COMMENTS, DM_RECEIVED, COMMENT_ECHO, DM_ECHO } = INSTAGRAM_EVENTS;
       const eventType = await this.getInstagramEventType(payload, accountId);
       switch (eventType) {
+        case DM_ECHO:
+          const sanitizedDmPayloadEcho: SanitizedDmPayload =
+            this.utilsService.sanitizeDmPayload(payload);
+          await this.saveDm(sanitizedDmPayloadEcho, accountId);
+          await this.dmService.handleDm(payload, accountId);
+          break;
         case DM_RECEIVED:
+          const sanitizedDmPayload: SanitizedDmPayload =
+            this.utilsService.sanitizeDmPayload(payload);
+          await this.saveDm(sanitizedDmPayload, accountId);
           await this.dmService.handleDm(payload, accountId);
           break;
         case COMMENTS:
@@ -112,6 +122,18 @@ export class IgMcpService {
       parentCommentId: payload.comment.parentCommentId,
       timestamp: payload.comment.timestamp,
       isReply: payload.comment.isReply,
+    });
+  }
+
+  async saveDm(payload: SanitizedDmPayload, accountId: number) {
+    const dm = payload.dm;
+    return await this.instagramService.saveDm({
+      id: dm.messageId,
+      accountId,
+      senderId: dm.senderId,
+      recipientId: dm.recipientId,
+      messageText: dm.messageText,
+      timestamp: new Date(dm.timestamp).toISOString(),
     });
   }
 }

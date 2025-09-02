@@ -96,3 +96,13 @@ export type IgCommentDto = {
   timestamp: string;
   createdAt: string;
 };
+
+export type IgDmDto = {
+  accountId: number;
+  id: string;
+  messageText: string;
+  senderId: string;
+  recipientId: string;
+  timestamp: string;
+  createdAt: string;
+};

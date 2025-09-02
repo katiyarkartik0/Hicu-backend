@@ -5,7 +5,7 @@ import { ProspectsService } from 'src/prospects/prospects.service';
 import { LeadsService } from 'src/leads/leads.service';
 import { UtilsService } from '../utils.service';
 import { BabbageGraphService } from './graphs/babbageGraph.service';
-import { DmLlmGraphState } from './types.service';
+import { DmLlmGraphState } from './types';
 
 @Injectable()
 export class DmService {

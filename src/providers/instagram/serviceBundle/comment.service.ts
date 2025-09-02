@@ -17,7 +17,6 @@ export class CommentService {
   ) {}
 
   async save(comment: Omit<IgCommentDto, 'createdAt'>) {
-    console.log(comment)
     return this.prismaService.igComment.create({ data: comment });
   }
 

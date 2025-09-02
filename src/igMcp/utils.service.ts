@@ -3,7 +3,7 @@ import { InstagramMessage } from 'src/providers/instagram/instagram.types';
 import { Type } from '@google/genai';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { CommentLlmGraphState } from './comment/types';
-import { SanitizedDmPayload } from './dm/types.service';
+import { SanitizedDmPayload } from './dm/types';
 
 @Injectable()
 export class UtilsService {

@@ -45,10 +45,19 @@ export class InstagramController {
     @Param('userId') userId: string,
     @Query('accountId') accountId: number,
   ) {
-    console.log(userId,accountId)
-    return await this.instagramService.getThreads(
+    console.log(userId, accountId);
+    return await this.instagramService.getThreads(accountId, userId);
+  }
+
+  @Get('getSavedConversation')
+  async getSavedConversation(
+    @Query('accountId') accountId: number,
+    @Query('userIdFromWebhookPayload') userIdFromWebhookPayload: string,
+  ) {
+    const data = await this.instagramService.getSavedConversation(
       accountId,
-      userId,
+      userIdFromWebhookPayload,
     );
+    return { data };
   }
 }

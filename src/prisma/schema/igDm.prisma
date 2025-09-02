@@ -1,0 +1,10 @@
+model IgDm {
+    accountId   Int
+    account     Account  @relation(fields: [accountId], references: [id])
+    id          String   @id //messageId
+    messageText String
+    timestamp   DateTime // IG timestamp
+    createdAt   DateTime @default(now()) // when stored locally
+    senderId    String
+    recipientId String
+}

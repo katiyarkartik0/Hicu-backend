@@ -5,7 +5,7 @@ import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
 import { ProspectsService } from 'src/prospects/prospects.service';
 import { AiService } from '../ai.service';
-import { DmLlmGraphState } from '../types.service';
+import { DmLlmGraphState } from '../types';
 
 @Injectable()
 export class BabbageGraphService {

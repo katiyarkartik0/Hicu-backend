@@ -17,6 +17,8 @@ export class InstagramService {
   sendDM: DmService['sendDM'];
   sendDmForExistingConversation: DmService['sendDmForExistingConversation'];
   sendImageInDm: DmService['sendImageInDm'];
+  saveDm: DmService['saveDm'];
+  getSavedConversation: DmService['getSavedConversation'];
 
   getAllSavedPosts: PostService['getAllSavedPosts'];
   getPostInfoByReplyId: PostService['getPostInfoByReplyId'];
@@ -41,8 +43,7 @@ export class InstagramService {
     this.getCommentsByPostId = this.commentService.getCommentsByPostId.bind(
       this.commentService,
     );
-    this.getThreads =
-      this.commentService.getThreads.bind(this.commentService);
+    this.getThreads = this.commentService.getThreads.bind(this.commentService);
 
     // DmService bindings
     this.getConversationHistory = this.dmService.getConversationHistory.bind(
@@ -52,6 +53,10 @@ export class InstagramService {
     this.sendDmForExistingConversation =
       this.dmService.sendDmForExistingConversation.bind(this.dmService);
     this.sendImageInDm = this.dmService.sendImageInDm.bind(this.dmService);
+    this.saveDm = this.dmService.saveDm.bind(this.dmService);
+    this.getSavedConversation = this.dmService.getSavedConversation.bind(
+      this.dmService,
+    );
 
     // PostService bindings
     this.getAllSavedPosts = this.postService.getAllSavedPosts.bind(

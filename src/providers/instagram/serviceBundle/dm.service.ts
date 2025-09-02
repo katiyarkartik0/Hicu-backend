@@ -4,13 +4,17 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrivateInfoService } from './privateInfo.service';
-import { InstagramConversation } from '../instagram.types';
+import { IgDmDto, InstagramConversation } from '../instagram.types';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class DmService {
   private readonly logger = new Logger(DmService.name);
 
-  constructor(private readonly privateInfoService: PrivateInfoService) {}
+  constructor(
+    private readonly privateInfoService: PrivateInfoService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   /**
    slide into DMs of the commenter
@@ -195,5 +199,47 @@ export class DmService {
         error.message,
       );
     }
+  }
+  async saveDm(dm: Omit<IgDmDto, 'createdAt'>) {
+    try {
+      return await this.prismaService.igDm.create({ data: dm });
+    } catch (err) {
+      this.logger.error(
+        'Failed to save DM to database',
+        err.stack || err.message,
+      );
+      throw new InternalServerErrorException('Failed to save DM');
+    }
+  }
+
+  /**
+   * Fetches the full DM conversation between a given Instagram account
+   * (`accountId` in our system) and a specific user (`userIdFromWebhookPayload`).
+   *
+   * ⚠️ IMPORTANT:
+   * - The `userIdFromWebhookPayload` must come directly from Instagram webhook events
+   *   (`sender.id` or `recipient.id` in the payload).
+   * - Do NOT use the user ID returned from `https://graph.instagram.com/me`
+   *   (Basic Display API), because that is a different ID namespace and will never
+   *   match the DM webhook IDs.
+   * - Only Instagram Business/Creator accounts connected to a Facebook Page
+   *   receive webhook events with the correct `1784...`-style IG User IDs.
+   *
+   * Example usage:
+   *   getConversation(123, "17841400008460056")
+   */
+  async getSavedConversation(accountId: number, userIdFromWebhookPayload: string) {
+    return await this.prismaService.igDm.findMany({
+      where: {
+        accountId,
+        OR: [
+          { senderId: userIdFromWebhookPayload },
+          { recipientId: userIdFromWebhookPayload },
+        ],
+      },
+      orderBy: {
+        timestamp: 'asc', // chronological order
+      },
+    });
   }
 }

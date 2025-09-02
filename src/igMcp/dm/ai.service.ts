@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
-import { DmLlmGraphState } from './types.service';
+import { DmLlmGraphState } from './types';
 
 @Injectable()
 export class AiService {
