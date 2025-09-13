@@ -1,0 +1,21 @@
+model IgReactFlowEdge {
+  accountId Int
+  edgeId    String @unique // React Flow's edge id (e.g., xy-edge__child-6-commentReplyAi-1757599048426)
+
+  // Source and Target Node relationships
+  sourceId String
+  targetId String
+
+  source IgReactFlowNode @relation("SourceEdges", fields: [sourceId], references: [nodeId])
+  target IgReactFlowNode @relation("TargetEdges", fields: [targetId], references: [nodeId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  mediaId   String
+  igMedia   IgMedia  @relation(fields: [mediaId], references: [id])
+
+  account Account @relation(fields: [accountId], references: [id])
+
+  automationId Int
+  automation   IgCommentAutomation @relation(fields: [automationId], references: [id])
+}

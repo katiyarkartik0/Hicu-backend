@@ -21,6 +21,8 @@ import { IgMcpModule } from './igMcp/igMcp.module';
 import { PineconeModule } from './pinecone/pinecone.module';
 import { LeadsModule } from './leads/leads.module';
 import { ProspectsModule } from './prospects/prospects.module';
+import { IgReactFlowModule } from './igReactFlow/igReactFlow.module';
+import { IgCommentAutomationModule } from './igCommentAutomation/igCommentAutomation.module';
 
 @Module({
   imports: [
@@ -47,7 +49,9 @@ import { ProspectsModule } from './prospects/prospects.module';
     IgMcpModule,
     PineconeModule,
     LeadsModule,
-    ProspectsModule
+    ProspectsModule,
+    IgReactFlowModule,
+    IgCommentAutomationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

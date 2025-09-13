@@ -1,13 +1,16 @@
 model IgMedia {
-    accountId Int
-    id        String      @unique // mediaId 
-    caption   String? // caption of the post
-    mediaUrl  String // media URL
-    mediaType String // IMAGE, VIDEO, etc.
-    timestamp DateTime // when the media was posted
-    createdAt DateTime    @default(now()) // when we saved it locally
-    updatedAt DateTime    @updatedAt // last time we updated locally
-    comments  IgComment[]
-
-    account Account @relation(fields: [accountId], references: [id])
+    accountId           Int
+    id                  String                @unique // mediaId 
+    caption             String? // caption of the post
+    mediaUrl            String // media URL
+    mediaType           String // IMAGE, VIDEO, etc.
+    timestamp           DateTime // when the media was posted
+    createdAt           DateTime              @default(now()) // when we saved it locally
+    updatedAt           DateTime              @updatedAt // last time we updated locally
+    comments            IgComment[]
+    igReactFlowNodes    IgReactFlowNode[]
+    igReactFlowNodeData IgReactFlowNodeData[]
+    igReactFlowEdge     IgReactFlowEdge[]
+    igCommentAutomation IgCommentAutomation[]
+    account             Account               @relation(fields: [accountId], references: [id])
 }

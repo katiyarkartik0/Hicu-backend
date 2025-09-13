@@ -19,7 +19,7 @@ export class AutomationsService {
   }
 
   findByIgCommentAutomationByMedia(mediaId: string) {
-    return this.prismaService.igCommentAutomation.findUnique({
+    return this.prismaService.igCommentAutomation.findFirst({
       where: { mediaId },
     });
   }
