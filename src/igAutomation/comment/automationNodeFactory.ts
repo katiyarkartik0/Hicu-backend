@@ -1,15 +1,15 @@
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
-import type { CommentLlmGraphState, NodeType } from './types';
+import type {
+  CommentLlmGraphState,
+  IgReactFlowNodeData,
+  NodeType,
+} from './types';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { Command } from '@langchain/langgraph';
 
 export class AutomationNodeFactory {
-  constructor(
-    // private readonly geminiService: GeminiService,
-    // private readonly instagramService: InstagramService,
-    // private readonly pineconeService: PineconeService,
-  ) {}
+  constructor() {} // private readonly pineconeService: PineconeService, // private readonly instagramService: InstagramService, // private readonly geminiService: GeminiService,
 
   readonly nodeRegistry: Record<NodeType, any> = {
     __start__: () => async (state: CommentLlmGraphState) => {
@@ -85,10 +85,12 @@ Text:
         geminiService,
         pineconeService,
         instagramService,
+        data,
       }: {
         geminiService: GeminiService;
         pineconeService: PineconeService;
         instagramService: InstagramService;
+        data: IgReactFlowNodeData;
       }) =>
       async (state: CommentLlmGraphState) => {
         try {
@@ -105,13 +107,25 @@ Text:
             query: commentText,
           });
 
-          const prompt = 'my prompt'; // replace with db query
-          const localPrompt = `you have access to
-        - vector search i.e., ${vectorSearchResult}
-        - comment text i.e., ${commentText}
-        - commenter username i.e., ${commenterUsername}
-        - prompt i.e., ${prompt}
-        now create a result based on provided`;
+          const { aiPrompt } = data;
+          if (!aiPrompt) {
+            return console.log('ai prompt not available');
+          }
+          const localPrompt = `
+          You are an Instagram DM assistant.
+          
+          The commenter asked: "${commentText}"
+          Commenter username: ${commenterUsername}
+          
+          Relevant knowledge from vector search:
+          ${JSON.stringify(vectorSearchResult)}
+          
+          Instruction for you (the AI):
+          ${aiPrompt}
+          
+          Now, based on the above, write a helpful and conversational reply to the commenter. 
+          Do not mention vector search or prompts — just answer naturally as if you are the brand. 
+          `;
 
           const geminiResponse = await geminiService.queryGemini(
             localPrompt,
@@ -134,10 +148,12 @@ Text:
         geminiService,
         pineconeService,
         instagramService,
+        data,
       }: {
         geminiService: GeminiService;
         pineconeService: PineconeService;
         instagramService: InstagramService;
+        data: IgReactFlowNodeData;
       }) =>
       async (state: CommentLlmGraphState) => {
         try {
@@ -150,10 +166,14 @@ Text:
           } = state;
 
           const prompt = 'my prompt'; // replace with db query
+          const { aiPrompt } = data;
+          if (!aiPrompt) {
+            return console.log('no ai prompt');
+          }
           const localPrompt = `you have access to
         - comment text i.e., ${commentText}
         - commenter username i.e., ${commenterUsername}
-        - prompt i.e., ${prompt}
+        - prompt i.e., ${aiPrompt}
         now create a result based on provided`;
 
           const geminiResponse = await geminiService.queryGemini(
@@ -177,10 +197,12 @@ Text:
         geminiService,
         pineconeService,
         instagramService,
+        data,
       }: {
         geminiService: GeminiService;
         pineconeService: PineconeService;
         instagramService: InstagramService;
+        data: IgReactFlowNodeData;
       }) =>
       async (state: CommentLlmGraphState) => {
         const {
@@ -191,10 +213,13 @@ Text:
           accountId,
         } = state;
 
-        const response = 'manual response'; // replace with db query
+        const { prototypeResponse } = data;
+        if (!prototypeResponse) {
+          return console.log('no prototype response');
+        }
         await instagramService.sendDM(
           { comment: { commentId }, media: { mediaOwnerId } },
-          response,
+          prototypeResponse,
           accountId,
         );
       },
@@ -205,10 +230,12 @@ Text:
         geminiService,
         pineconeService,
         instagramService,
+        data,
       }: {
         geminiService: GeminiService;
         pineconeService: PineconeService;
         instagramService: InstagramService;
+        data: IgReactFlowNodeData;
       }) =>
       async (state: CommentLlmGraphState) => {
         try {
@@ -224,12 +251,15 @@ Text:
             query: commentText,
           });
 
-          const prompt = 'my prompt'; // replace with db query
+          const { aiPrompt } = data;
+          if (!aiPrompt) {
+            return console.log('no ai prompt');
+          }
           const localPrompt = `you have access to
         - vector search i.e., ${vectorSearchResult}
         - comment text i.e., ${commentText}
         - commenter username i.e., ${commenterUsername}
-        - prompt i.e., ${prompt}
+        - prompt i.e., ${aiPrompt}
         now create a result based on provided`;
 
           const geminiResponse = await geminiService.queryGemini(
@@ -253,10 +283,12 @@ Text:
         geminiService,
         pineconeService,
         instagramService,
+        data,
       }: {
         geminiService: GeminiService;
         pineconeService: PineconeService;
         instagramService: InstagramService;
+        data: IgReactFlowNodeData;
       }) =>
       async (state: CommentLlmGraphState) => {
         try {
@@ -267,11 +299,15 @@ Text:
             accountId,
           } = state;
 
-          const prompt = 'my prompt'; // replace with db query
+          const { aiPrompt } = data;
+          if (!aiPrompt) {
+            return console.log('no ai prompt');
+          }
+
           const localPrompt = `you have access to
         - comment text i.e., ${commentText}
         - commenter username i.e., ${commenterUsername}
-        - prompt i.e., ${prompt}
+        - prompt i.e., ${aiPrompt}
         now create a result based on provided`;
 
           const geminiResponse = await geminiService.queryGemini(
@@ -295,13 +331,18 @@ Text:
         geminiService,
         pineconeService,
         instagramService,
+        data,
       }: {
         geminiService: GeminiService;
         pineconeService: PineconeService;
         instagramService: InstagramService;
+        data: IgReactFlowNodeData;
       }) =>
       async (state: CommentLlmGraphState) => {
-        const response = 'manual response'; //replace by a db query
+        const { prototypeResponse } = data;
+        if (!prototypeResponse) {
+          return console.log('no response to send');
+        }
         console.log(state, 'state');
         const {
           commentPayload: {
@@ -310,7 +351,11 @@ Text:
           accountId,
         } = state;
 
-        await instagramService.respondToComment(commentId, response, accountId);
+        await instagramService.respondToComment(
+          commentId,
+          prototypeResponse,
+          accountId,
+        );
       },
   };
 }

@@ -114,6 +114,7 @@ export class GraphService {
         pineconeService: this.pineconeService,
         instagramService: this.instagramService,
         conditionalEdgesToNodes, // pass it only if it exists
+        data
       });
     });
 
