@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { IgCommentAutomationWithFlow } from './types';
+import { NodesAndEdges } from 'src/igAutomation/comment/types';
 
 @Injectable()
 export class IgCommentAutomationService {
@@ -30,4 +32,13 @@ export class IgCommentAutomationService {
     });
   }
 
+  async findFirstByMediaId(mediaId: string): Promise<NodesAndEdges | null> {
+    return this.prismaService.igCommentAutomation.findFirst({
+      where: { mediaId, isActive: true },
+      select: {
+        nodes: { include: { data: true } },
+        edges: true,
+      },
+    }) as unknown as NodesAndEdges; // <-- type cast after narrowing
+  }
 }

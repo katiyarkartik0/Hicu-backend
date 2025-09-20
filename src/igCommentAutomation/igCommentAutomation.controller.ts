@@ -21,10 +21,17 @@ export class IgCommentAutomationController {
     return { data };
   }
 
-  @Get('media/:mediaId')
+  @Get('findAll/:mediaId')
   async findAllByMedia(@Param('mediaId') mediaId: string) {
     const data =
       await this.igCommentAutomationService.findAllByMediaId(mediaId);
+    return { data };
+  }
+
+  @Get('findFirst/:mediaId')
+  async findFirstByMediaId(@Param('mediaId') mediaId: string) {
+    const data =
+      await this.igCommentAutomationService.findFirstByMediaId(mediaId);
     return { data };
   }
 }

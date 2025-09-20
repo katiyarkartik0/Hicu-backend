@@ -4,7 +4,7 @@ import { IgCommentAutomationService } from './igCommentAutomation.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
-  exports: [],
+  exports: [IgCommentAutomationService],
   imports: [PrismaModule],
   providers: [IgCommentAutomationService],
   controllers: [IgCommentAutomationController],

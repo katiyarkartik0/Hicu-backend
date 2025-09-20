@@ -13,8 +13,8 @@ import { DmService } from './dm/index.service';
 import { SanitizedDmPayload } from './dm/types';
 
 @Injectable()
-export class IgMcpService {
-  private readonly logger = new Logger(IgMcpService.name);
+export class IgAutomationService {
+  private readonly logger = new Logger(IgAutomationService.name);
 
   constructor(
     private readonly instagramService: InstagramService,

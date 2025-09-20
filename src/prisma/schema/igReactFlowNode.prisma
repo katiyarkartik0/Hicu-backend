@@ -1,15 +1,17 @@
 model IgReactFlowNode {
-  nodeId    String               @unique
+  nodeId    String                 @unique
   type      String
   positionX Float
   positionY Float
-  width     Float
-  height    Float
-  dragging  Boolean              @default(false)
-  selected  Boolean              @default(false)
+  width     Float?
+  height    Float?
+  parentId  String?
+  extent    IgReactFlowNodeExtent?
+  dragging  Boolean                @default(false)
+  selected  Boolean                @default(false)
   data      IgReactFlowNodeData?
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
 
   // Relations for edges
   sourceEdges IgReactFlowEdge[] @relation("SourceEdges")
@@ -26,15 +28,23 @@ model IgReactFlowNode {
 }
 
 model IgReactFlowNodeData {
-  accountId           Int
-  nodeId              String          @unique
-  label               String
-  description         String
-  prototypeResponse   String?
-  aiPrompt            String?
-  hasConditionalEdges Boolean         @default(false)
-  mediaId             String
-  igMedia             IgMedia         @relation(fields: [mediaId], references: [id])
-  node                IgReactFlowNode @relation(fields: [nodeId], references: [nodeId])
-  account             Account         @relation(fields: [accountId], references: [id])
+  accountId               Int
+  nodeId                  String  @unique
+  nodeType                String
+  label                   String
+  description             String
+  prototypeResponse       String?
+  aiPrompt                String?
+  hasConditionalEdges     Boolean @default(false)
+  mediaId                 String
+  automationId            Int
+  conditionalEdgesToNodes Json?
+
+  igMedia IgMedia         @relation(fields: [mediaId], references: [id])
+  node    IgReactFlowNode @relation(fields: [nodeId], references: [nodeId])
+  account Account         @relation(fields: [accountId], references: [id])
+}
+
+enum IgReactFlowNodeExtent {
+  parent
 }

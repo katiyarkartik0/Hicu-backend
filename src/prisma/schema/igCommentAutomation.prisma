@@ -2,6 +2,8 @@ model IgCommentAutomation {
   id   Int     @id @default(autoincrement())
   name String?
 
+  isActive Boolean @default(false)
+
   mediaId String
   igMedia IgMedia @relation(fields: [mediaId], references: [id])
 

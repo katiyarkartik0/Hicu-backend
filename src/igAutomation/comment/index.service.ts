@@ -6,9 +6,13 @@ import { LeadsService } from 'src/leads/leads.service';
 import { ProspectsService } from 'src/prospects/prospects.service';
 
 import type { SanitizedCommentPayload } from 'src/providers/instagram/instagram.types';
-import { TuringGraphService } from './graphs/turingGraph.service';
 import { UtilsService } from '../utils.service';
-import { CommentLlmGraphState } from './types';
+import {
+  CommentLlmGraphState,
+} from './types';
+
+import { GraphService } from './graph.service';
+
 
 @Injectable()
 export class CommentService {
@@ -16,11 +20,11 @@ export class CommentService {
 
   constructor(
     private readonly instagramService: InstagramService,
-    private readonly turingGraphService: TuringGraphService,
     private readonly utilsService: UtilsService,
     private readonly automationService: AutomationsService,
     private readonly leadsService: LeadsService,
     private readonly prospectsService: ProspectsService,
+    private readonly graphService: GraphService,
   ) {}
 
   private getSanitizedHistory({
@@ -99,6 +103,7 @@ export class CommentService {
   }
 
   async handleComment(webhookPayload: any, accountId: number) {
+
     try {
       const payload: SanitizedCommentPayload =
         this.utilsService.sanitizeCommentPayload(webhookPayload);
@@ -116,7 +121,10 @@ export class CommentService {
       const igCommentAutomation =
         await this.automationService.findByIgCommentAutomationByMedia(mediaId);
 
-      if (!igCommentAutomation?.commentAutomationId) {
+      if (
+        !igCommentAutomation ||
+        igCommentAutomation.commentAutomationId === null
+      ) {
         return;
       }
 
@@ -138,19 +146,11 @@ export class CommentService {
         igCommentAutomation,
         leadsAsked,
       };
-
       this.logger.log(`Running graph for commenter ${commenterId}`);
-      await this.turingGraphService.runGraph(graphState);
+      await this.graphService.handleAutomation(graphState);
     } catch (err) {
       this.logger.error('Error handling comment webhook', err.stack);
       throw err;
-    }
-  }
-
-  async handleAutomation(graphState: CommentLlmGraphState) {
-    const { igCommentAutomation } = graphState;
-    if (igCommentAutomation.commentAutomationId === 1) {
-      await this.turingGraphService.runGraph(graphState);
     }
   }
 

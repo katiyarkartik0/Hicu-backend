@@ -91,6 +91,8 @@ export class IgReactFlowService {
       igMedia: {
         connect: { id: node.mediaId },
       },
+      extent: node.extent,
+      parentId: node.parentId,
       data: node.data
         ? {
             create: {
@@ -103,6 +105,9 @@ export class IgReactFlowService {
               igMedia: {
                 connect: { id: node.mediaId },
               },
+              nodeType: node.type,
+              automationId: node.automationId,
+              conditionalEdgesToNodes: node.data.conditionalEdgesToNodes,
             },
           }
         : undefined,
@@ -113,17 +118,22 @@ export class IgReactFlowService {
     node: CreateNodeDto,
   ): Prisma.IgReactFlowNodeUpdateInput {
     return {
-      type: { set: node.type },
-      positionX: { set: node.positionX },
-      positionY: { set: node.positionY },
-      width: { set: node.width },
-      height: { set: node.height },
+      type: node.type,
+      positionX: node.positionX,
+      positionY: node.positionY,
+      width: node.width,
+      height: node.height,
+
       account: {
         connect: { id: node.accountId },
       },
       igMedia: {
         connect: { id: node.mediaId },
       },
+
+      extent: node.extent,
+      parentId: node.parentId,
+
       data: node.data
         ? {
             upsert: {
@@ -134,11 +144,13 @@ export class IgReactFlowService {
                 aiPrompt: node.data.aiPrompt || null,
                 hasConditionalEdges: node.data.hasConditionalEdges,
                 account: { connect: { id: node.accountId } },
-                igMedia: {
-                  connect: { id: node.mediaId },
-                },
+                igMedia: { connect: { id: node.mediaId } },
+                nodeType: node.type,
+                automationId: node.automationId,
+                conditionalEdgesToNodes: node.data.conditionalEdgesToNodes,
               },
               update: {
+                // ✅ Nested scalar updates still need { set: … }
                 label: { set: node.data.label },
                 description: { set: node.data.description },
                 prototypeResponse: node.data.prototypeResponse
@@ -147,17 +159,28 @@ export class IgReactFlowService {
                 aiPrompt: node.data.aiPrompt
                   ? { set: node.data.aiPrompt }
                   : { set: null },
-                hasConditionalEdges: {
-                  set: node.data.hasConditionalEdges,
-                },
+                hasConditionalEdges: { set: node.data.hasConditionalEdges },
+                nodeType: { set: node.type },
                 account: { connect: { id: node.accountId } },
-                igMedia: {
-                  connect: { id: node.mediaId },
-                },
+                igMedia: { connect: { id: node.mediaId } },
+                automationId: { set: node.automationId },
+                conditionalEdgesToNodes: node.data.conditionalEdgesToNodes,
               },
             },
           }
         : undefined,
     };
+  }
+
+  async getNodeData({ nodeId }: { nodeId: string }) {
+    return this.prismaService.igReactFlowNodeData.findMany({
+      where: { nodeId },
+    });
+  }
+
+  async getAllNodeData({ automationId }: { automationId: number }) {
+    return this.prismaService.igReactFlowNodeData.findMany({
+      where: { automationId },
+    });
   }
 }

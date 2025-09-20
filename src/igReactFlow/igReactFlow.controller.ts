@@ -10,6 +10,11 @@ import {
 } from '@nestjs/common';
 import { IgReactFlowService } from './igReactFlow.service';
 
+class ConditionalEdgeDto {
+  condition: string;
+  route: string;
+}
+
 class CreateNodeDataDto {
   nodeId: string;
   label: string;
@@ -17,9 +22,12 @@ class CreateNodeDataDto {
   prototypeResponse?: string;
   aiPrompt?: string;
   hasConditionalEdges: boolean;
+  conditionalEdgesToNodes?: any; // 👈 NEW
 }
 
 // DTOs for request validation
+export type NodeExtent = 'parent';
+
 export class CreateNodeDto {
   automationId: number;
   accountId: number;
@@ -28,9 +36,11 @@ export class CreateNodeDto {
   type: string;
   positionX: number;
   positionY: number;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   data: CreateNodeDataDto;
+  parentId?: string;
+  extent?: NodeExtent;
 }
 
 export class CreateEdgeDto {
