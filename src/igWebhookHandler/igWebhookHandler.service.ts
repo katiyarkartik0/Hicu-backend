@@ -12,9 +12,11 @@ import { UtilsService } from './utils.service';
 import { DmService } from './dm/index.service';
 import { SanitizedDmPayload } from './dm/types';
 
+let count = 0;
+
 @Injectable()
-export class IgMcpService {
-  private readonly logger = new Logger(IgMcpService.name);
+export class IgWebhookHandlerService {
+  private readonly logger = new Logger(IgWebhookHandlerService.name);
 
   constructor(
     private readonly instagramService: InstagramService,
@@ -85,7 +87,6 @@ export class IgMcpService {
           const sanitizedDmPayloadEcho: SanitizedDmPayload =
             this.utilsService.sanitizeDmPayload(payload);
           await this.saveDm(sanitizedDmPayloadEcho, accountId);
-          await this.dmService.handleDm(payload, accountId);
           break;
         case DM_RECEIVED:
           const sanitizedDmPayload: SanitizedDmPayload =
@@ -126,6 +127,8 @@ export class IgMcpService {
   }
 
   async saveDm(payload: SanitizedDmPayload, accountId: number) {
+    console.log(payload,"saveing....",count)
+    count++;
     const dm = payload.dm;
     return await this.instagramService.saveDm({
       id: dm.messageId,

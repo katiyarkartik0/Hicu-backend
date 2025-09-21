@@ -1,7 +1,20 @@
 model IgCommentAutomation {
-  id                  Int     @id @default(autoincrement())
-  mediaId             String  @unique
-  accountId           Int
-  commentAutomationId Int     @default(0)
-  account             Account @relation(fields: [accountId], references: [id])
+  id   Int     @id @default(autoincrement())
+  name String?
+
+  isActive Boolean @default(false)
+
+  mediaId String
+  igMedia IgMedia @relation(fields: [mediaId], references: [id])
+
+  commentAutomationId Int @default(0)
+
+  accountId Int
+  account   Account @relation(fields: [accountId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nodes IgReactFlowNode[]
+  edges IgReactFlowEdge[]
 }

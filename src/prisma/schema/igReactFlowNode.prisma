@@ -1,0 +1,50 @@
+model IgReactFlowNode {
+  nodeId    String                 @unique
+  type      String
+  positionX Float
+  positionY Float
+  width     Float?
+  height    Float?
+  parentId  String?
+  extent    IgReactFlowNodeExtent?
+  dragging  Boolean                @default(false)
+  selected  Boolean                @default(false)
+  data      IgReactFlowNodeData?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+
+  // Relations for edges
+  sourceEdges IgReactFlowEdge[] @relation("SourceEdges")
+  targetEdges IgReactFlowEdge[] @relation("TargetEdges")
+
+  accountId Int
+  account   Account @relation(fields: [accountId], references: [id])
+
+  mediaId String
+  igMedia IgMedia @relation(fields: [mediaId], references: [id])
+
+  automationId Int
+  automation   IgCommentAutomation @relation(fields: [automationId], references: [id])
+}
+
+model IgReactFlowNodeData {
+  accountId               Int
+  nodeId                  String  @unique
+  nodeType                String
+  label                   String
+  description             String
+  prototypeResponse       String?
+  aiPrompt                String?
+  hasConditionalEdges     Boolean @default(false)
+  mediaId                 String
+  automationId            Int
+  conditionalEdgesToNodes Json?
+
+  igMedia IgMedia         @relation(fields: [mediaId], references: [id])
+  node    IgReactFlowNode @relation(fields: [nodeId], references: [nodeId])
+  account Account         @relation(fields: [accountId], references: [id])
+}
+
+enum IgReactFlowNodeExtent {
+  parent
+}

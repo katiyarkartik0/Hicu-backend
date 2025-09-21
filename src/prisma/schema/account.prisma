@@ -24,4 +24,7 @@ model Account {
   IgMedia             IgMedia[]
   IgComment           IgComment[]
   IgDm                IgDm[]
+  IgReactFlowNode     IgReactFlowNode[]
+  IgReactFlowEdge     IgReactFlowEdge[]
+  IgReactFlowNodeData IgReactFlowNodeData[]
 }
