@@ -4,8 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = env("PG_SQL_DATABASE_URL")
-  url = "postgresql://newtonschool:dummy@localhost:5432/stealth?schema=public"
+  url      = env("PG_SQL_DATABASE_URL")
 }
 
 enum MemberStatus {
