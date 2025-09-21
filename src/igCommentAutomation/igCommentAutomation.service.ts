@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { NodesAndEdges } from './types';
 
@@ -39,5 +39,35 @@ export class IgCommentAutomationService {
         edges: true,
       },
     }) as unknown as NodesAndEdges; // <-- type cast after narrowing
+  }
+
+  async activateAutomation(commentAutomationId: number) {
+    const automation = await this.prismaService.igCommentAutomation.update({
+      where: { id: commentAutomationId },
+      data: { isActive: true },
+    });
+
+    if (!automation) {
+      throw new NotFoundException(
+        `Automation with ID ${commentAutomationId} not found`,
+      );
+    }
+
+    return automation;
+  }
+
+  async deactivateAutomation(commentAutomationId: number) {
+    const automation = await this.prismaService.igCommentAutomation.update({
+      where: { id: commentAutomationId },
+      data: { isActive: false },
+    });
+
+    if (!automation) {
+      throw new NotFoundException(
+        `Automation with ID ${commentAutomationId} not found`,
+      );
+    }
+
+    return automation;
   }
 }

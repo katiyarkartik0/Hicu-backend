@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { IgCommentAutomationService } from './igCommentAutomation.service';
 
 @Controller('/igCommentAutomation')
@@ -32,6 +32,22 @@ export class IgCommentAutomationController {
   async findFirstByMediaId(@Param('mediaId') mediaId: string) {
     const data =
       await this.igCommentAutomationService.findFirstByMediaId(mediaId);
+    return { data };
+  }
+
+  @Patch('activate/:id')
+  async activate(@Param('id') id: string) {
+    const data = await this.igCommentAutomationService.activateAutomation(
+      Number(id),
+    );
+    return { data };
+  }
+
+  @Patch('deactivate/:id')
+  async deactivate(@Param('id') id: string) {
+    const data = await this.igCommentAutomationService.deactivateAutomation(
+      Number(id),
+    );
     return { data };
   }
 }

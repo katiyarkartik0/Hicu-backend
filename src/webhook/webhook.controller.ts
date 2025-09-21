@@ -1,11 +1,11 @@
 import {
-  BadRequestException,
   Body,
-  Controller,
   Get,
   Param,
   Post,
   Query,
+  Controller,
+  BadRequestException,
 } from '@nestjs/common';
 import { WEBHOOK_PROVIDERS } from './types/webhook.types';
 import { WebhookService } from './webhook.service';
