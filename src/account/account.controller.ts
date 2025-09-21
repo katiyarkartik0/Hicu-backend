@@ -19,30 +19,35 @@ export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
   @Post()
-  createAccount(@Body() createAccountDto: AccountDto) {
-    return this.accountService.createAccount(createAccountDto);
+  async createAccount(@Body() createAccountDto: AccountDto) {
+    const data = await this.accountService.createAccount(createAccountDto);
+    return { data };
   }
 
   @Get()
-  findAllAccounts() {
-    return this.accountService.findAllAccounts();
+  async findAllAccounts() {
+    const data = await this.accountService.findAllAccounts();
+    return { data };
   }
 
   @Get(':id')
-  findAccountById(@Param('id') id: number) {
-    return this.accountService.findAccountById(id);
+  async findAccountById(@Param('id') id: number) {
+    const data = await this.accountService.findAccountById(id);
+    return { data };
   }
 
   @Patch(':id')
-  updateAccount(
+  async updateAccount(
     @Param('id') id: number,
     @Body() updateAccountDto: UpdateAccountDto,
   ) {
-    return this.accountService.updateAccount(id, updateAccountDto);
+    const data = this.accountService.updateAccount(id, updateAccountDto);
+    return { data };
   }
 
   @Delete(':id')
-  removeAccount(@Param('id') id: number) {
-    return this.accountService.removeAccount(id);
+  async removeAccount(@Param('id') id: number) {
+    const data = this.accountService.removeAccount(id);
+    return { data };
   }
 }
