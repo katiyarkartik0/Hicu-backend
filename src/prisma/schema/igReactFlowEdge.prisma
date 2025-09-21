@@ -3,11 +3,14 @@ model IgReactFlowEdge {
   edgeId    String @unique // React Flow's edge id (e.g., xy-edge__child-6-commentReplyAi-1757599048426)
 
   // Source and Target Node relationships
-  sourceId String
-  targetId String
+  sourceId   String
+  sourceType String
+  targetId   String
+  targetType String
 
   source IgReactFlowNode @relation("SourceEdges", fields: [sourceId], references: [nodeId])
   target IgReactFlowNode @relation("TargetEdges", fields: [targetId], references: [nodeId])
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

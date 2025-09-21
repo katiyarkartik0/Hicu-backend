@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { IgCommentAutomationWithFlow } from './types';
-import { NodesAndEdges } from 'src/igAutomation/comment/types';
+import type { NodesAndEdges } from './types';
 
 @Injectable()
 export class IgCommentAutomationService {

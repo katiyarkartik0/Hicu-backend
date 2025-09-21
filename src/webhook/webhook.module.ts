@@ -3,10 +3,10 @@ import { WebhookService } from './webhook.service';
 import { WebhookController } from './webhook.controller';
 import { InstagramModule } from '../providers/instagram/instagram.module';
 import { ConfigurationsModule } from 'src/configurations/configurations.module';
-import { IgAutomationModule } from 'src/igAutomation/igAutomation.module';
+import { IgWebhookHandlerModule } from 'src/igWebhookHandler/igWebhookHandler.module';
 
 @Module({
-  imports: [InstagramModule, ConfigurationsModule, IgAutomationModule],
+  imports: [InstagramModule, ConfigurationsModule, IgWebhookHandlerModule],
   providers: [WebhookService],
   controllers: [WebhookController],
 })

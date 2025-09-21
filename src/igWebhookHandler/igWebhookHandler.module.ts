@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { IgAutomationService } from './igAutomation.service';
+import { IgWebhookHandlerService } from './igWebhookHandler.service';
 import { InstagramModule } from 'src/providers/instagram/instagram.module';
 import { UtilsService } from './utils.service';
 import { DmService } from './dm/index.service';
@@ -29,7 +29,7 @@ import { GraphService } from './comment/graph.service';
     PrismaModule,
   ],
   providers: [
-    IgAutomationService,
+    IgWebhookHandlerService,
     DmService,
     CommentService,
     BabbageGraphService,
@@ -39,6 +39,6 @@ import { GraphService } from './comment/graph.service';
     GraphService
   ],
   controllers: [],
-  exports: [IgAutomationService],
+  exports: [IgWebhookHandlerService],
 })
-export class IgAutomationModule {}
+export class IgWebhookHandlerModule {}

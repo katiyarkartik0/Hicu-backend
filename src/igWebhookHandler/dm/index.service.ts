@@ -55,7 +55,7 @@ export class DmService {
     } = payload;
 
     const prospect = await this.getProspect({ senderId, accountId });
-
+console.log(payload,"payload[handleDm]")
     const conversationHistory =
       await this.instagramService.getConversationHistory(senderId, accountId);
 

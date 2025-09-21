@@ -3,21 +3,19 @@ import {
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   Param,
   Post,
   Query,
 } from '@nestjs/common';
 import { WEBHOOK_PROVIDERS } from './types/webhook.types';
 import { WebhookService } from './webhook.service';
-import { InstagramService } from '../providers/instagram/instagram.service';
-import { IgAutomationService } from 'src/igAutomation/igAutomation.service';
+import { IgWebhookHandlerService } from 'src/igWebhookHandler/igWebhookHandler.service';
 
 @Controller('webhook')
 export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
-    private readonly igAutomationService: IgAutomationService,
+    private readonly igWebhookHandlerService: IgWebhookHandlerService,
   ) {}
 
   @Get(':provider')
@@ -61,7 +59,8 @@ export class WebhookController {
       );
     }
     if (provider === INSTAGRAM) {
-      return await this.igAutomationService.handleIgWebhook(body, accountId);
+      this.igWebhookHandlerService.handleIgWebhook(body, accountId);
+      return { message: 'ok' };
     } else if (!WEBHOOK_PROVIDERS.hasOwnProperty(provider)) {
       throw new BadRequestException('Unsupported provider');
     }

@@ -17,7 +17,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
 import { ConfigurationsModule } from './configurations/configurations.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { ShopifyModule } from './shopify/shopify.module';
-import { IgAutomationModule } from './igAutomation/igAutomation.module';
+import { IgWebhookHandlerModule } from './igWebhookHandler/igWebhookHandler.module';
 import { PineconeModule } from './pinecone/pinecone.module';
 import { LeadsModule } from './leads/leads.module';
 import { ProspectsModule } from './prospects/prospects.module';
@@ -46,7 +46,7 @@ import { IgCommentAutomationModule } from './igCommentAutomation/igCommentAutoma
     ConfigurationsModule,
     EncryptionModule,
     ShopifyModule,
-    IgAutomationModule,
+    IgWebhookHandlerModule,
     PineconeModule,
     LeadsModule,
     ProspectsModule,

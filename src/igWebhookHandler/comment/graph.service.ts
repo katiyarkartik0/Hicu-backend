@@ -1,17 +1,16 @@
 import { StateGraph, StateGraphArgs } from '@langchain/langgraph';
 import { Injectable } from '@nestjs/common';
-import type {
-  CommentLlmGraphState,
-  IgReactFlowEdge,
-  IgReactFlowNode,
-  IgReactFlowNodeData,
-  NodeCallback,
-} from './types';
+import type { CommentLlmGraphState, LangraphNodeCb } from './types';
 import { AutomationNodeFactory } from './automationNodeFactory';
 import { IgCommentAutomationService } from 'src/igCommentAutomation/igCommentAutomation.service';
 import { InstagramService } from 'src/providers/instagram/instagram.service';
 import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
+import {
+  IgReactFlowEdge,
+  IgReactFlowNode,
+  IgReactFlowNodeData,
+} from 'src/igCommentAutomation/types';
 
 @Injectable()
 export class GraphService {
@@ -64,7 +63,7 @@ export class GraphService {
   }
 
   private buildGraph(
-    virtualNodeRegistry: Record<string, NodeCallback>,
+    virtualNodeRegistry: Record<string, LangraphNodeCb>,
     nodes: IgReactFlowNode[],
     edges: IgReactFlowEdge[],
   ): StateGraph<CommentLlmGraphState> {
@@ -73,8 +72,10 @@ export class GraphService {
     });
 
     // 1. Add all nodes first
+    // 1. Add nodes
     for (const node of nodes) {
       if (
+        !node.data ||
         node.data.nodeType === '__start__' ||
         node.data.nodeType === '__end__'
       ) {
@@ -85,36 +86,56 @@ export class GraphService {
     }
 
     // 2. Add conditional edges
-    for (const node of nodes.filter((n) => n.data.hasConditionalEdges)) {
+    for (const node of nodes.filter(
+      (n) => n.data && n.data.hasConditionalEdges,
+    )) {
+      if (!node.data) continue;
+
+      const nodeKey =
+        node.data.nodeType === '__start__' || node.data.nodeType === '__end__'
+          ? node.data.nodeType
+          : node.data.nodeId;
+
       builder.addConditionalEdges(
-        node.data.nodeId as any,
+        nodeKey as any,
+        // @ts-expect-error: forcing to keep silent since all the nodes in virtual registry return a Promise<CommentLlmState | void>,
+        // and this expects a Promise<string | string[]>
         virtualNodeRegistry[node.data.nodeId],
       );
     }
 
     // 3. Add plain edges
     for (const edge of edges) {
-      builder.addEdge(edge.sourceId as any, edge.targetId as any);
+      const source =
+        edge.sourceType === '__start__' || edge.sourceType === '__end__'
+          ? edge.sourceType
+          : edge.sourceId;
+
+      const target =
+        edge.targetType === '__start__' || edge.targetType === '__end__'
+          ? edge.targetType
+          : edge.targetId;
+
+      builder.addEdge(source as any, target as any);
     }
+
     return builder;
   }
 
   private buildVirtualNodeRegistry(
     nodes: IgReactFlowNode[],
-  ): Record<string, NodeCallback> {
+  ): Record<string, LangraphNodeCb> {
     const registry = this.nodeHandlerRegistry.nodeRegistry;
-    const virtualNodeRegistry: Record<string, NodeCallback> = {};
+    const virtualNodeRegistry: Record<string, LangraphNodeCb> = {};
 
     nodes.forEach(({ data }: IgReactFlowNode) => {
-      const { nodeType, nodeId, conditionalEdgesToNodes } =
-        data as IgReactFlowNodeData;
+      const { nodeType, nodeId } = data as IgReactFlowNodeData;
 
       virtualNodeRegistry[nodeId] = registry[nodeType]({
         geminiService: this.geminiService,
         pineconeService: this.pineconeService,
         instagramService: this.instagramService,
-        conditionalEdgesToNodes, // pass it only if it exists
-        data
+        data,
       });
     });
 
@@ -122,10 +143,14 @@ export class GraphService {
   }
 
   async handleAutomation(graphState: CommentLlmGraphState) {
+    console.log("first")
     const mediaId = graphState.commentPayload.media.mediaId;
-
+    console.log("second")
+console.log(graphState)
     const result =
       await this.igCommentAutomationService.findFirstByMediaId(mediaId);
+      console.log("result",result)
+
     if (!result) return;
 
     const virtualNodeRegistry = this.buildVirtualNodeRegistry(result.nodes);

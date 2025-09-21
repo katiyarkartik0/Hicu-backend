@@ -202,6 +202,7 @@ export class DmService {
   }
   async saveDm(dm: Omit<IgDmDto, 'createdAt'>) {
     try {
+      console.log(dm)
       return await this.prismaService.igDm.create({ data: dm });
     } catch (err) {
       this.logger.error(

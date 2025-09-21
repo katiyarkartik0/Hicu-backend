@@ -50,6 +50,8 @@ export class CreateEdgeDto {
   edgeId: string;
   sourceId: string;
   targetId: string;
+  sourceType: string;
+  targetType: string;
 }
 
 @Controller('igReactFlow')

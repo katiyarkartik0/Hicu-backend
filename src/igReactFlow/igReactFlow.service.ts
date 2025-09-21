@@ -58,8 +58,12 @@ export class IgReactFlowService {
         this.prismaService.igReactFlowEdge.upsert({
           where: { edgeId: edge.edgeId },
           update: {
-            source: { connect: { nodeId: edge.sourceId } },
-            target: { connect: { nodeId: edge.targetId } },
+            sourceId: edge.sourceId,
+            targetId: edge.targetId,
+            sourceType: edge.sourceType,
+            targetType: edge.targetType,
+            mediaId: edge.mediaId,
+            automationId: edge.automationId,
           },
           create: {
             automation: { connect: { id: edge.automationId } },
@@ -68,6 +72,8 @@ export class IgReactFlowService {
             source: { connect: { nodeId: edge.sourceId } },
             target: { connect: { nodeId: edge.targetId } },
             igMedia: { connect: { id: edge.mediaId } },
+            sourceType: edge.sourceType,
+            targetType: edge.targetType,
           },
         }),
       ),

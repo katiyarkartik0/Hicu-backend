@@ -1,17 +1,19 @@
-import { InstagramService } from 'src/providers/instagram/instagram.service';
-import { PineconeService } from 'src/pinecone/pinecone.service';
-import type {
-  CommentLlmGraphState,
-  IgReactFlowNodeData,
-  NodeType,
-} from './types';
-import { GeminiService } from 'src/ai/providers/gemini/gemini.service';
 import { Command } from '@langchain/langgraph';
+import type { IgReactFlowNodeType } from 'src/igCommentAutomation/types';
+import type { CommentLlmGraphState, LangraphNodeCb, NodeDeps } from './types';
 
 export class AutomationNodeFactory {
   constructor() {} // private readonly pineconeService: PineconeService, // private readonly instagramService: InstagramService, // private readonly geminiService: GeminiService,
 
-  readonly nodeRegistry: Record<NodeType, any> = {
+  readonly nodeRegistry: Record<
+    IgReactFlowNodeType,
+    ({
+      pineconeService,
+      instagramService,
+      geminiService,
+      data,
+    }: NodeDeps) => LangraphNodeCb
+  > = {
     __start__: () => async (state: CommentLlmGraphState) => {
       return state; // no-op
     },
@@ -20,18 +22,9 @@ export class AutomationNodeFactory {
     },
 
     aiRouter:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        conditionalEdgesToNodes,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        conditionalEdgesToNodes: any;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
+        const { conditionalEdgesToNodes } = data;
         console.log(conditionalEdgesToNodes, 'conditionalEdgesToNodes');
         const {
           comment: { commentText },
@@ -81,17 +74,7 @@ Text:
 
     // --- DM nodes ---
     dmAiVectorDb:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        data,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        data: IgReactFlowNodeData;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
         try {
           const {
@@ -144,17 +127,7 @@ Text:
       },
 
     dmAi:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        data,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        data: IgReactFlowNodeData;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
         try {
           const {
@@ -193,17 +166,7 @@ Text:
       },
 
     dmManual:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        data,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        data: IgReactFlowNodeData;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
         const {
           commentPayload: {
@@ -226,17 +189,7 @@ Text:
 
     // --- Comment nodes ---
     commentReplyAiVectorDb:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        data,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        data: IgReactFlowNodeData;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
         try {
           const {
@@ -279,17 +232,7 @@ Text:
       },
 
     commentReplyAi:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        data,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        data: IgReactFlowNodeData;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
         try {
           const {
@@ -327,17 +270,7 @@ Text:
       },
 
     commentReplyManual:
-      ({
-        geminiService,
-        pineconeService,
-        instagramService,
-        data,
-      }: {
-        geminiService: GeminiService;
-        pineconeService: PineconeService;
-        instagramService: InstagramService;
-        data: IgReactFlowNodeData;
-      }) =>
+      ({ geminiService, pineconeService, instagramService, data }: NodeDeps) =>
       async (state: CommentLlmGraphState) => {
         const { prototypeResponse } = data;
         if (!prototypeResponse) {
